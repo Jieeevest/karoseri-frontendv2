@@ -29,70 +29,81 @@ const navItems: NavItem[] = [
   },
   {
     href: "/workspace/requests",
-    label: "Requests",
+    label: "Permintaan",
     icon: "ki-package",
     separator: "transactional",
   },
   {
     href: "/workspace/inbounds",
-    label: "Inbounds",
+    label: "Barang Masuk",
     icon: "ki-purchase",
     separator: "transactional",
   },
   {
     href: "/workspace/outbounds",
-    label: "Outbounds",
+    label: "Barang Keluar",
     icon: "ki-purchase",
     separator: "transactional",
   },
   {
     href: "/workspace/inventories",
-    label: "Inventory",
+    label: "Inventaris",
     icon: "ki-office-bag",
     separator: "transactional",
   },
   {
     href: "/workspace/employees",
-    label: "Employees",
+    label: "Karyawan",
     icon: "ki-users",
     separator: "master data",
   },
   {
     href: "/workspace/roles",
-    label: "Roles",
+    label: "Akses Role",
     icon: "ki-security-user",
     separator: "master data",
   },
   {
     href: "/workspace/groups",
-    label: "Groups",
+    label: "Grup",
     icon: "ki-users",
     separator: "master data",
   },
   {
     href: "/workspace/positions",
-    label: "Positions",
+    label: "Jabatan",
     icon: "ki-briefcase",
     separator: "master data",
   },
 
   {
     href: "/workspace/suppliers",
-    label: "Suppliers",
+    label: "Suplier",
     icon: "ki-users",
+    separator: "master data",
+  },
+  {
+    href: "/workspace/vehicles",
+    label: "Kendaraan",
+    icon: "ki-delivery",
+    separator: "master data",
+  },
+  {
+    href: "/workspace/locations",
+    label: "Lokasi Penyimpanan",
+    icon: "ki-geolocation",
     separator: "master data",
   },
 ];
 
 export default function Sidebar() {
-  // A map to track which menu is open using the index
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
 
   const handleToggleMenu = (index: number) => {
     if (openMenuIndex === index) {
-      setOpenMenuIndex(null); // Close the menu if it's already open
+      setOpenMenuIndex(null);
     } else {
-      setOpenMenuIndex(index); // Open the menu if it's closed
+      setOpenMenuIndex(index);
     }
   };
 

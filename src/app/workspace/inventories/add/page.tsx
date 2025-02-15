@@ -2,165 +2,15 @@
 import {
   Card,
   ConfirmationModal,
-  InputCheckbox,
   InputText,
   SuccessModal,
 } from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
-import { useCreateMenuMutation, useCreateRoleMutation } from "@/services/api";
-import Image from "next/image";
+import { useCreateInventoryMutation } from "@/services/api"; // Assuming a `useCreateInventoryMutation` hook exists
 import { useRouter } from "next/navigation";
 import React, { Fragment, useState } from "react";
 
-const columns = [
-  { label: "Menu Name", tooltip: "", icon: "" },
-  { label: "View", tooltip: "", icon: "" },
-  { label: "Create", tooltip: "", icon: "" },
-  { label: "Delete", tooltip: "", icon: "" },
-  { label: "Update", tooltip: "", icon: "" },
-];
-
-const data = [
-  {
-    "Menu Name": (
-      <div className="flex items-center space-x-4">
-        <div>
-          <Image src="/siap-logo-new.png" alt="logo" width={20} height={20} />
-        </div>
-        <div className="text-left">
-          <p className="font-bold">Employee Management</p>
-          <p className="font-light">Sistem Administrasi Pegawai (SIAP)</p>
-        </div>
-      </div>
-    ),
-    View: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Create: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Delete: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Update: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-  },
-  {
-    "Menu Name": (
-      <div className="flex items-center space-x-4">
-        <div>
-          <Image src="/siap-logo-new.png" alt="logo" width={20} height={20} />
-        </div>
-        <div className="text-left">
-          <p className="font-bold">Leave Management Management</p>
-          <p className="font-light">Sistem Administrasi Pegawai (SIAP)</p>
-        </div>
-      </div>
-    ),
-    View: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Create: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Delete: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Update: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-  },
-  {
-    "Menu Name": (
-      <div className="flex items-center space-x-4">
-        <div>
-          <Image src="/siap-logo-new.png" alt="logo" width={20} height={20} />
-        </div>
-        <div className="text-left">
-          <p className="font-bold">Article Management</p>
-          <p className="font-light">Sistem Administrasi Pegawai (SIAP)</p>
-        </div>
-      </div>
-    ),
-    View: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Create: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Delete: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Update: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-  },
-  {
-    "Menu Name": (
-      <div className="flex items-center space-x-4">
-        <div className="scale-150">
-          <Image
-            src="/siap-payment-new.png"
-            alt="logo"
-            width={20}
-            height={20}
-          />
-        </div>
-        <div className="text-left">
-          <p className="font-bold">Reimbursement Management</p>
-          <p className="font-light">Payment Apps</p>
-        </div>
-      </div>
-    ),
-    View: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Create: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Delete: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Update: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-  },
-];
-
-export default function AddNewRole() {
+export default function AddNewInventory() {
   const router = useRouter();
   const [openModal, setOpenModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
@@ -170,52 +20,59 @@ export default function AddNewRole() {
   });
   const [payload, setPayload] = useState({
     name: "",
+    amount: 0,
+    typeId: 0,
+    categoryId: 0,
+    locationId: 0,
+    minimumStock: 0,
     description: "",
-    urlMenu: "",
-    iconMenu: "",
-    category: "",
-    orderingNumber: 0,
-    parentMenu: {},
   });
-  const [createRoles] = useCreateRoleMutation();
 
+  const [createInventory] = useCreateInventoryMutation();
+
+  // Handle change in form fields
   const handleChange = (key: string, value: any) => {
-    return setPayload({
+    setPayload({
       ...payload,
       [key]: value,
     });
   };
 
+  // Handle form submission
   const handleSubmit = async () => {
     setOpenModal(true);
   };
 
+  // Execute submit logic
   const _executeSubmit = async () => {
     try {
-      await createRoles(payload).unwrap();
+      await createInventory(payload).unwrap();
       setStatusMessage({
-        message: "Menu submitted successfully!",
+        message: "Inventory item submitted successfully!",
         type: "Success",
       });
       setSuccessModal(true);
-      router.push("/workspace/menu");
+      router.push("/workspace/inventory");
     } catch (error) {
       setStatusMessage({
-        message: "Error submitting menu",
+        message: "Error submitting inventory item",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Error submitting menu:", error);
+      console.error("Error submitting inventory item:", error);
     }
   };
+
   return (
     <Fragment>
       <div className="px-10 overflow-auto bg-transparent pt-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Add New Role</h1>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Add New Inventory Item
+            </h1>
             <p className="text-base text-gray-600 px-0.5 pb-3">
-              Add new role description.
+              Add new inventory item details.
             </p>
           </div>
         </div>
@@ -224,10 +81,12 @@ export default function AddNewRole() {
         <div className="flex max-w-full min-w-fit">
           <Card
             styleHeader={"justify-start"}
-            contentHeader={<p className="font-semibold">Role Information</p>}
+            contentHeader={
+              <p className="font-semibold">Inventory Item Information</p>
+            }
             styleFooter={"justify-end"}
             contentFooter={
-              <div className="flex justify-end gap-2 ">
+              <div className="flex justify-end gap-2">
                 <DefaultButton
                   type="pill"
                   appearance="light"
@@ -237,7 +96,7 @@ export default function AddNewRole() {
                 <DefaultButton
                   type="pill"
                   appearance="warning"
-                  text="Save as draft"
+                  text="Save as Draft"
                 />
                 <DefaultButton
                   type="pill"
@@ -249,94 +108,105 @@ export default function AddNewRole() {
             }
           >
             <div className="w-[1300px] space-y-4 my-4">
+              {/* Inventory Name */}
               <InputText
                 type="text"
-                label="Role Name"
+                label="Inventory Item Name"
                 required={true}
-                placeholder="Role Name"
+                placeholder="Item Name"
                 className="w-[600px]"
                 value={payload.name}
                 onChange={(e) => handleChange("name", e.target.value)}
               />
+
+              {/* Amount */}
+              <InputText
+                type="number"
+                label="Amount"
+                required={true}
+                placeholder="Amount"
+                className="w-[600px]"
+                value={String(payload.amount)}
+                onChange={(e) => handleChange("amount", e.target.value)}
+              />
+
+              {/* Type */}
+              {/* <div className="w-[600px]">
+                <label className="block text-sm font-medium text-gray-700">Type</label>
+                <select
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                  value={payload.typeId}
+                  onChange={(e) => handleChange("typeId", e.target.value)}
+                >
+                  <option value={0}>Select Type</option>
+                  {types?.data?.map((type: any) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+              </div> */}
+
+              {/* Category */}
+              {/* <div className="w-[600px]">
+                <label className="block text-sm font-medium text-gray-700">Category</label>
+                <select
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                  value={payload.categoryId}
+                  onChange={(e) => handleChange("categoryId", e.target.value)}
+                >
+                  <option value={0}>Select Category</option>
+                  {categories?.data?.map((category: any) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div> */}
+
+              {/* Location */}
+              {/* <div className="w-[600px]">
+                <label className="block text-sm font-medium text-gray-700">Location</label>
+                <select
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                  value={payload.locationId}
+                  onChange={(e) => handleChange("locationId", e.target.value)}
+                >
+                  <option value={0}>Select Location</option>
+                  {locations?.data?.map((location: any) => (
+                    <option key={location.id} value={location.id}>
+                      {location.name}
+                    </option>
+                  ))}
+                </select>
+              </div> */}
+
+              {/* Minimum Stock */}
+              <InputText
+                type="number"
+                label="Minimum Stock"
+                required={true}
+                placeholder="Minimum Stock"
+                className="w-[600px]"
+                value={String(payload.minimumStock)}
+                onChange={(e) => handleChange("minimumStock", e.target.value)}
+              />
+
+              {/* Description */}
               <InputText
                 type="text"
                 label="Description"
-                required={true}
                 placeholder="Description"
                 className="w-[600px]"
-                value={payload?.description}
+                value={payload.description}
                 onChange={(e) => handleChange("description", e.target.value)}
               />
-              <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
-                <label className="form-label max-w-44">
-                  Authorization Menu
-                  <span className="text-danger">*</span>
-                </label>
-                <div
-                  data-datatable="true"
-                  data-datatable-page-size="5"
-                  data-datatable-state-save="true"
-                  id="datatable_1"
-                >
-                  <div className="scrollable-x-auto border rounded-lg">
-                    <table
-                      className="table table-auto"
-                      data-datatable-table="true"
-                    >
-                      <thead>
-                        <tr>
-                          {columns.map((column, index) => (
-                            <th
-                              key={index}
-                              className={`${
-                                index == 0 ? "w-[300px]" : "w-[120px]"
-                              } text-center`}
-                            >
-                              <span className="sort">
-                                <span className="sort-label">
-                                  {column.tooltip ? (
-                                    <span
-                                      className="pt-px"
-                                      data-tooltip="true"
-                                      data-tooltip-offset="0, 5px"
-                                      data-tooltip-placement="top"
-                                    >
-                                      <i className={column.icon} />
-                                      <span
-                                        className="tooltip max-w-48"
-                                        data-tooltip-content="true"
-                                      >
-                                        {column.tooltip}
-                                      </span>
-                                    </span>
-                                  ) : (
-                                    column.label
-                                  )}
-                                </span>
-                              </span>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.map((row: any, rowIndex: number) => (
-                          <tr key={rowIndex}>
-                            {columns.map((column, colIndex) => (
-                              <td key={colIndex} className="text-center">
-                                {row[column.label] || "-"}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
             </div>
           </Card>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
@@ -344,6 +214,8 @@ export default function AddNewRole() {
           handleConfirm={() => _executeSubmit()}
         />
       )}
+
+      {/* Success Modal */}
       {successModal && (
         <SuccessModal
           showModal={successModal}

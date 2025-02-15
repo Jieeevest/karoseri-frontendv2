@@ -1,16 +1,9 @@
 "use client";
-import {
-  Card,
-  ConfirmationModal,
-  InputCheckbox,
-  InputText,
-  SuccessModal,
-} from "@/components/atoms";
+import { Card, InputCheckbox, InputText } from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
-import { useCreateRoleMutation } from "@/services/api";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 
 const columns = [
   { label: "Menu Name", tooltip: "", icon: "" },
@@ -160,62 +153,18 @@ const data = [
   },
 ];
 
-export default function AddNewRole() {
+export default function EditRole() {
   const router = useRouter();
-  const [openModal, setOpenModal] = useState(false);
-  const [successModal, setSuccessModal] = useState(false);
-  const [statusMessage, setStatusMessage] = useState({
-    message: "",
-    type: "",
-  });
-  const [payload, setPayload] = useState({
-    name: "",
-    description: "",
-    urlMenu: "",
-    iconMenu: "",
-    category: "",
-    orderingNumber: 0,
-    parentMenu: {},
-  });
-  const [createRoles] = useCreateRoleMutation();
-
-  const handleChange = (key: string, value: any) => {
-    return setPayload({
-      ...payload,
-      [key]: value,
-    });
-  };
-
-  const handleSubmit = async () => {
-    setOpenModal(true);
-  };
-
-  const _executeSubmit = async () => {
-    try {
-      await createRoles(payload).unwrap();
-      setStatusMessage({
-        message: "Menu submitted successfully!",
-        type: "Success",
-      });
-      setSuccessModal(true);
-      router.push("/workspace/menu");
-    } catch (error) {
-      setStatusMessage({
-        message: "Error submitting menu",
-        type: "Error",
-      });
-      setSuccessModal(true);
-      console.error("Error submitting menu:", error);
-    }
-  };
   return (
     <Fragment>
       <div className="px-10 overflow-auto bg-transparent pt-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Add New Role</h1>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Edit Information Role
+            </h1>
             <p className="text-base text-gray-600 px-0.5 pb-3">
-              Add new role description.
+              Edit information role description.
             </p>
           </div>
         </div>
@@ -234,29 +183,17 @@ export default function AddNewRole() {
                   text="Cancel"
                   onClick={() => router.back()}
                 />
-                <DefaultButton
-                  type="pill"
-                  appearance="warning"
-                  text="Save as draft"
-                />
-                <DefaultButton
-                  type="pill"
-                  appearance="primary"
-                  text="Submit"
-                  onClick={() => handleSubmit()}
-                />
+                <DefaultButton type="pill" appearance="primary" text="Update" />
               </div>
             }
           >
-            <div className="w-[1300px] space-y-4 my-4">
+            <div className="w-[1200px] space-y-4 my-4">
               <InputText
                 type="text"
                 label="Role Name"
                 required={true}
                 placeholder="Role Name"
                 className="w-[600px]"
-                value={payload.name}
-                onChange={(e) => handleChange("name", e.target.value)}
               />
               <InputText
                 type="text"
@@ -264,8 +201,6 @@ export default function AddNewRole() {
                 required={true}
                 placeholder="Description"
                 className="w-[600px]"
-                value={payload?.description}
-                onChange={(e) => handleChange("description", e.target.value)}
               />
               <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
                 <label className="form-label max-w-44">
@@ -337,21 +272,6 @@ export default function AddNewRole() {
           </Card>
         </div>
       </div>
-      {openModal && (
-        <ConfirmationModal
-          showModal={openModal}
-          handleClose={() => setOpenModal(false)}
-          handleConfirm={() => _executeSubmit()}
-        />
-      )}
-      {successModal && (
-        <SuccessModal
-          showModal={successModal}
-          title={statusMessage?.type}
-          message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
-        />
-      )}
     </Fragment>
   );
 }

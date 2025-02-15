@@ -11,6 +11,7 @@ interface TextAreaProps {
   isDisabled?: boolean;
   placeholder?: string;
   className?: string;
+  error?: string;
 }
 
 const TextArea: React.FC<TextAreaProps> = ({
@@ -24,6 +25,7 @@ const TextArea: React.FC<TextAreaProps> = ({
   isDisabled = false,
   placeholder = "",
   className = "",
+  error,
 }) => {
   const inputSize = {
     default: "",
@@ -58,6 +60,7 @@ const TextArea: React.FC<TextAreaProps> = ({
             rows={rows}
             value={value}
           />
+          {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
         </div>
       </div>
     </div>

@@ -10,28 +10,25 @@ import Error404 from "@/components/molecules/Error404";
 import Loading from "@/components/molecules/Loading";
 import { formatDate } from "@/helpers";
 import {
-  useDeleteInventoryMutation,
-  useGetInventoryQuery,
+  useDeleteSupplierMutation,
+  useGetSuppliersQuery,
 } from "@/services/api";
 import { useRouter } from "next/navigation";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
-  { label: "Item Name", tooltip: "", icon: "" },
-  { label: "Amount", tooltip: "", icon: "" },
-  { label: "Type", tooltip: "", icon: "" },
-  { label: "Category", tooltip: "", icon: "" },
-  { label: "Location", tooltip: "", icon: "" },
-  { label: "Minimum Stock", tooltip: "", icon: "" },
-  { label: "Description", tooltip: "", icon: "" },
-  { label: "Added Date", tooltip: "", icon: "" },
-  { label: "Last Updated", tooltip: "", icon: "" },
+  { label: "Nama Suplier", tooltip: "", icon: "" },
+  { label: "Kategori", tooltip: "", icon: "" },
+  { label: "No. Rekening", tooltip: "", icon: "" },
+  { label: "Email", tooltip: "", icon: "" },
+  { label: "Telp", tooltip: "", icon: "" },
+  { label: "Total Piutang", tooltip: "", icon: "" },
 ];
 
-export default function InventoryOverview() {
+export default function SuppliersOverview() {
   const router = useRouter();
-  const [inventoryList, setInventoryList] = useState([]);
+  const [supplierList, setSupplierList] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [selectedId, setSelectedId] = useState(1);
@@ -52,36 +49,29 @@ export default function InventoryOverview() {
     page: number;
     totalData: number;
   });
+  const { data: supplierData, error, isLoading } = useGetSuppliersQuery(filter);
+  const [deleteSupplier] = useDeleteSupplierMutation();
 
-  const {
-    data: inventoryData,
-    error,
-    isLoading,
-  } = useGetInventoryQuery(filter);
-  const [deleteInventory] = useDeleteInventoryMutation();
-
-  const inventory = useMemo(
-    () => inventoryData?.data?.inventory || [],
-    [inventoryData?.data?.inventory]
+  const suppliers = useMemo(
+    () => supplierData?.data?.suppliers || [],
+    [supplierData?.data?.suppliers]
   );
 
   useEffect(() => {
-    if (inventoryData?.data) {
-      const currentData = inventoryData?.data;
+    if (supplierData?.data) {
+      const currentData = supplierData?.data;
       setFilter({ ...filter, totalData: currentData?.totalData || 0 });
     }
-  }, [inventoryData?.data]);
+  }, [supplierData?.data]);
 
   useEffect(() => {
-    const mappedData: any = inventory.map((item: any) => ({
+    const mappedData: any = suppliers.map((item: any) => ({
       "": (
         <div className="flex justify-center items-center gap-2 cursor-pointer">
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
             role="button"
-            onClick={() =>
-              router.push(`/workspace/inventories/${item?.id}/edit`)
-            }
+            onClick={() => router.push(`/workspace/suppliers/${item?.id}/edit`)}
           ></i>
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
@@ -89,18 +79,16 @@ export default function InventoryOverview() {
           ></i>
         </div>
       ),
-      "Item Name": item?.name || "N/A",
-      Amount: item?.amount || "N/A",
-      Type: item?.type?.name || "N/A",
-      Category: item?.category?.name || "N/A",
-      Location: item?.location?.name || "N/A",
-      "Minimum Stock": item?.minimumStock || "N/A",
-      Description: item?.description || "N/A",
-      "Added Date": formatDate(item?.createdAt) || "N/A",
-      "Last Updated": formatDate(item?.updatedAt) || "N/A",
+      "Nama Suplier": item?.name || "-",
+      Kategori: item?.category || "-",
+      "No. Rekening":
+        `${item?.bankName} ${item?.bankNumber} - ${item?.bankOwner}` || "-",
+      Email: item?.email || "-",
+      Telp: item?.phoneNumber || "-",
+      "Total Piutang": item?.debt || "-",
     }));
-    setInventoryList(mappedData);
-  }, [inventory]);
+    setSupplierList(mappedData);
+  }, [suppliers]);
 
   const handleDelete = async (id: number) => {
     setOpenModal(true);
@@ -109,24 +97,24 @@ export default function InventoryOverview() {
 
   const _executeDelete = async () => {
     try {
-      await deleteInventory(selectedId).unwrap();
+      await deleteSupplier(selectedId).unwrap();
       setStatusMessage({
-        message: "Inventory item deleted successfully!",
+        message: "Supplier deleted successfully!",
         type: "Success",
       });
       setOpenModal(false);
       setSuccessModal(true);
       setTimeout(() => {
-        router.push("/workspace/inventories");
+        router.push("/workspace/suppliers");
       }, 3000);
     } catch (error) {
       setOpenModal(false);
       setStatusMessage({
-        message: "Error deleting inventory item",
+        message: "Error deleting supplier",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Error deleting inventory item:", error);
+      console.error("Error deleting supplier:", error);
     }
   };
 
@@ -139,10 +127,10 @@ export default function InventoryOverview() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Inventory Overview
+              Master Data Suplier
             </h1>
             <p className="text-base text-gray-600 px-0.5 pb-3">
-              Manage your inventory items.
+              Fitur untuk mengelola suplier.
             </p>
           </div>
           <div className="space-x-2">
@@ -155,10 +143,10 @@ export default function InventoryOverview() {
             <DefaultButton
               type="pill"
               appearance="primary"
-              text="Add New Item"
+              text="Tambah Suplier"
               icon="ki-plus-squared"
               className="cursor-pointer"
-              onClick={() => router.push("/workspace/inventories/add")}
+              onClick={() => router.push("/workspace/suppliers/add")}
             />
           </div>
         </div>
@@ -166,9 +154,9 @@ export default function InventoryOverview() {
       <div className="px-10 overflow-auto bg-transparent pt-4 sm:px-6 lg:px-8 mt-2">
         <div className="flex max-w-full">
           <DataTable
-            title="Inventory List"
+            title="Pustaka Suplier"
             columns={columns}
-            data={inventoryList}
+            data={supplierList}
             filter={filter}
             setFilter={setFilter}
             className="w-full"
@@ -179,7 +167,7 @@ export default function InventoryOverview() {
         <ConfirmationModal
           showModal={openModal}
           title="Confirmation"
-          message="Are you sure you want to delete this inventory item?"
+          message="Are you sure you want to delete this supplier?"
           buttonText="Confirm"
           buttonColor="btn-danger"
           handleClose={() => setOpenModal(false)}

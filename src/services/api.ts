@@ -9,10 +9,15 @@ interface PaginatedResponse<T> {
     pageSize: number;
     totalData: number;
     roles: T[];
-    members: T[];
-    packages: T[];
-    menu: T[];
-    teams: T[];
+    inventory: T[];
+    employees: T[];
+    requests: T[];
+    suppliers: T[];
+    positions: T[];
+    groups: T[];
+    locations: T[];
+    vehicles: T[];
+    activityLogs: T[];
   };
 }
 
@@ -27,12 +32,26 @@ export interface RoleData {
 
 export interface EmployeeData {
   id: number;
+  nik: string;
   fullName: string | null;
   email: string;
   phoneNumber: string | null;
-  role: string;
-  position: string;
-  group: string;
+  password: string | null;
+  employeeNumber: string | null;
+  profileImage: string | null;
+  joinedDate: string | null;
+  resignedDate: string | null;
+  homeAddress: string | null;
+  birthPlace: string | null;
+  birthDate: string;
+  gender: string | null;
+  nationality: string | null;
+  religion: string | null;
+  maritalStatus: string | null;
+  positionId: number | null;
+  roleId: number | null;
+  role: RoleData;
+  groupId: number | null;
   status: string | null;
   createdAt: string;
   updatedAt: string;
@@ -86,6 +105,30 @@ export interface GroupData {
   updatedAt: string;
 }
 
+export interface LocationData {
+  id: number;
+  name: string | null;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VehicleData {
+  id: number;
+  showroomName: string | null;
+  ownerName: string | null;
+  expeditionName: string | null;
+  merk: string | null;
+  series: string | null;
+  color: string | null;
+  type: string | null;
+  chasisNumber: string | null;
+  machineNumber: string | null;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ActivityLogData {
   id: number;
   activity: string;
@@ -95,10 +138,127 @@ export interface ActivityLogData {
   updatedAt: string;
 }
 
+export interface ResponseRoleData {
+  data: {
+    id: number;
+    name: string;
+    description: string | null;
+    status: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponseEmployeeData {
+  data: {
+    id: number;
+    name: string | null;
+    amount: number;
+    type: string | null;
+    category: string | null;
+    location: string | null;
+    status: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponseInventoryData {
+  data: {
+    id: number;
+    name: string | null;
+    amount: number;
+    typeId: number;
+    type: string | null;
+    categoryId: number;
+    category: string | null;
+    locationId: number;
+    location: string | null;
+    status: string | null;
+    minimumStock: number | null;
+    description: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponsePositionData {
+  data: {
+    id: number;
+    name: string | null;
+    description: string | null;
+    status: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponseGroupData {
+  data: {
+    id: number;
+    name: string | null;
+    description: string | null;
+    status: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponseLocationData {
+  data: {
+    id: number;
+    name: string | null;
+    description: string | null;
+    status: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponseRequestData {
+  data: {
+    id: number;
+    incomingDate: string;
+    supplier: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponseSupplierData {
+  data: {
+    id: number;
+    name: string | null;
+    phoneNumber: string | null;
+    email: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponseVehicleData {
+  data: {
+    id: number;
+    showroomName: string | null;
+    ownerName: string | null;
+    expeditionName: string | null;
+    merk: string | null;
+    series: string | null;
+    color: string | null;
+    type: string | null;
+    chasisNumber: string | null;
+    machineNumber: string | null;
+    description: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.NEXT_PUBLIC_API_URL}/api`,
+    baseUrl: `${process.env.NEXT_PUBLIC_API_URL}/api/v1`,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("accessToken");
       if (token) {
@@ -115,6 +275,8 @@ export const api = createApi({
     "Inventory",
     "Requests",
     "Suppliers",
+    "Locations",
+    "Vehicles",
     "ActivityLogs",
   ],
   endpoints: (builder) => ({
@@ -133,6 +295,10 @@ export const api = createApi({
 
         return queryString;
       },
+      providesTags: ["Roles"],
+    }),
+    getRoleById: builder.query<ResponseRoleData, number>({
+      query: (id) => `/roles/${id}`,
       providesTags: ["Roles"],
     }),
     createRole: builder.mutation<void, Partial<RoleData>>({
@@ -179,6 +345,10 @@ export const api = createApi({
       },
       providesTags: ["Employees"],
     }),
+    getEmployeeById: builder.query<ResponseEmployeeData, number>({
+      query: (id) => `/employees/${id}`,
+      providesTags: ["Employees"],
+    }),
     createEmployee: builder.mutation<void, Partial<EmployeeData>>({
       query: (newEmployee) => ({
         url: "/employees",
@@ -213,23 +383,25 @@ export const api = createApi({
       PaginatedResponse<InventoryData>,
       {
         keyword: string;
-        category: string;
-        type: string;
+        status: string;
         pageSize: number;
         page: number;
       }
     >({
-      query: ({ keyword, category, type, pageSize, page }) => {
+      query: ({ keyword, status, pageSize, page }) => {
         let queryString = "/inventory?";
 
         if (keyword) queryString += `keyword=${keyword}&`;
-        if (category) queryString += `category=${category}&`;
-        if (type) queryString += `type=${type}&`;
+        if (status) queryString += `category=${status}&`;
         if (pageSize) queryString += `limit=${pageSize}`;
         if (page) queryString += `&page=${page}`;
 
         return queryString;
       },
+      providesTags: ["Inventory"],
+    }),
+    getInventoryById: builder.query<ResponseInventoryData, number>({
+      query: (id) => `/inventory/${id}`,
       providesTags: ["Inventory"],
     }),
     createInventory: builder.mutation<void, Partial<InventoryData>>({
@@ -238,6 +410,25 @@ export const api = createApi({
         method: "POST",
         body: JSON.stringify(newInventory),
         headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Inventory"],
+    }),
+    updateInventory: builder.mutation<
+      void,
+      { id: number; updates: Partial<InventoryData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/inventory/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Inventory"],
+    }),
+    deleteInventory: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/inventory/${id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["Inventory"],
     }),
@@ -258,6 +449,38 @@ export const api = createApi({
       },
       providesTags: ["Requests"],
     }),
+    getRequestById: builder.query<ResponseRequestData, number>({
+      query: (id) => `/requests/${id}`,
+      providesTags: ["Requests"],
+    }),
+    createRequest: builder.mutation<void, Partial<RequestData>>({
+      query: (newRequest) => ({
+        url: "/requests",
+        method: "POST",
+        body: JSON.stringify(newRequest),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Requests"],
+    }),
+    updateRequest: builder.mutation<
+      void,
+      { id: number; updates: Partial<RequestData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/requests/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Requests"],
+    }),
+    deleteRequest: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/requests/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Requests"],
+    }),
 
     /** Suppliers Endpoint */
     getSuppliers: builder.query<
@@ -274,6 +497,38 @@ export const api = createApi({
         return queryString;
       },
       providesTags: ["Suppliers"],
+    }),
+    getSupplierById: builder.query<ResponseSupplierData, number>({
+      query: (id) => `/suppliers/${id}`,
+      providesTags: ["Suppliers"],
+    }),
+    createSupplier: builder.mutation<void, Partial<SupplierData>>({
+      query: (newSupplier) => ({
+        url: "/suppliers",
+        method: "POST",
+        body: JSON.stringify(newSupplier),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Suppliers"],
+    }),
+    updateSupplier: builder.mutation<
+      void,
+      { id: number; updates: Partial<SupplierData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/suppliers/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Suppliers"],
+    }),
+    deleteSupplier: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/suppliers/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Suppliers"],
     }),
 
     /** Position Endpoint */
@@ -293,6 +548,38 @@ export const api = createApi({
       },
       providesTags: ["Positions"],
     }),
+    getPositionById: builder.query<ResponsePositionData, number>({
+      query: (id) => `/positions/${id}`,
+      providesTags: ["Positions"],
+    }),
+    createPosition: builder.mutation<void, Partial<PositionData>>({
+      query: (newPosition) => ({
+        url: "/positions",
+        method: "POST",
+        body: JSON.stringify(newPosition),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Positions"],
+    }),
+    updatePosition: builder.mutation<
+      void,
+      { id: number; updates: Partial<PositionData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/positions/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Positions"],
+    }),
+    deletePosition: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/positions/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Positions"],
+    }),
 
     /** Group Endpoint */
     getGroups: builder.query<
@@ -310,6 +597,138 @@ export const api = createApi({
         return queryString;
       },
       providesTags: ["Groups"],
+    }),
+    getGroupById: builder.query<ResponseGroupData, number>({
+      query: (id) => `/groups/${id}`,
+      providesTags: ["Groups"],
+    }),
+    createGroup: builder.mutation<void, Partial<GroupData>>({
+      query: (newGroup) => ({
+        url: "/groups",
+        method: "POST",
+        body: JSON.stringify(newGroup),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Groups"],
+    }),
+    updateGroup: builder.mutation<
+      void,
+      { id: number; updates: Partial<GroupData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/groups/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Groups"],
+    }),
+    deleteGroup: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/groups/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Groups"],
+    }),
+
+    /** Location Endpoint */
+    getLocations: builder.query<
+      PaginatedResponse<LocationData>,
+      { keyword: string; status: string; pageSize: number; page: number }
+    >({
+      query: ({ keyword, status, pageSize, page }) => {
+        let queryString = "/saving-locations?";
+
+        if (keyword) queryString += `keyword=${keyword}&`;
+        if (status) queryString += `status=${status}&`;
+        if (pageSize) queryString += `limit=${pageSize}`;
+        if (page) queryString += `&page=${page}`;
+
+        return queryString;
+      },
+      providesTags: ["Locations"],
+    }),
+    getLocationById: builder.query<ResponseLocationData, number>({
+      query: (id) => `/groups/${id}`,
+      providesTags: ["Locations"],
+    }),
+    createLocation: builder.mutation<void, Partial<LocationData>>({
+      query: (newLocation) => ({
+        url: "/saving-locations",
+        method: "POST",
+        body: JSON.stringify(newLocation),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Locations"],
+    }),
+    updateLocation: builder.mutation<
+      void,
+      { id: number; updates: Partial<GroupData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/saving-locations/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Locations"],
+    }),
+    deleteLocation: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/saving-locations/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Locations"],
+    }),
+
+    /** Vechicle Endpoint */
+    getVehicles: builder.query<
+      PaginatedResponse<VehicleData>,
+      { keyword: string; status: string; pageSize: number; page: number }
+    >({
+      query: ({ keyword, status, pageSize, page }) => {
+        let queryString = "/vehicles?";
+
+        if (keyword) queryString += `keyword=${keyword}&`;
+        if (status) queryString += `status=${status}&`;
+        if (pageSize) queryString += `limit=${pageSize}`;
+        if (page) queryString += `&page=${page}`;
+
+        return queryString;
+      },
+      providesTags: ["Vehicles"],
+    }),
+    getVehicleById: builder.query<ResponseVehicleData, number>({
+      query: (id) => `/vehicles/${id}`,
+      providesTags: ["Vehicles"],
+    }),
+    createVehicle: builder.mutation<void, Partial<VehicleData>>({
+      query: (newVehicle) => ({
+        url: "/vehicles",
+        method: "POST",
+        body: JSON.stringify(newVehicle),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Vehicles"],
+    }),
+    updateVehicle: builder.mutation<
+      void,
+      { id: number; updates: Partial<VehicleData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/vehicles/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Vehicles"],
+    }),
+    deleteVehicle: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/vehicles/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Vehicles"],
     }),
 
     /** Activity Logs Endpoint */
@@ -331,19 +750,60 @@ export const api = createApi({
 });
 
 export const {
+  //roles
   useGetRolesQuery,
+  useGetRoleByIdQuery,
   useCreateRoleMutation,
   useUpdateRoleMutation,
   useDeleteRoleMutation,
+  //employees
   useGetEmployeesQuery,
+  useGetEmployeeByIdQuery,
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
   useDeleteEmployeeMutation,
+  //inventory
   useGetInventoryQuery,
+  useGetInventoryByIdQuery,
   useCreateInventoryMutation,
+  useUpdateInventoryMutation,
+  useDeleteInventoryMutation,
+  //requests
   useGetRequestsQuery,
+  useGetRequestByIdQuery,
+  useCreateRequestMutation,
+  useUpdateRequestMutation,
+  useDeleteRequestMutation,
+  //suppliers
   useGetSuppliersQuery,
+  useGetSupplierByIdQuery,
+  useCreateSupplierMutation,
+  useUpdateSupplierMutation,
+  useDeleteSupplierMutation,
+  //positions
   useGetPositionsQuery,
+  useGetPositionByIdQuery,
+  useCreatePositionMutation,
+  useUpdatePositionMutation,
+  useDeletePositionMutation,
+  //groups
   useGetGroupsQuery,
+  useGetGroupByIdQuery,
+  useCreateGroupMutation,
+  useUpdateGroupMutation,
+  useDeleteGroupMutation,
+  //locations
+  useGetLocationsQuery,
+  useGetLocationByIdQuery,
+  useCreateLocationMutation,
+  useUpdateLocationMutation,
+  useDeleteLocationMutation,
+  //vehicles
+  useGetVehiclesQuery,
+  useGetVehicleByIdQuery,
+  useCreateVehicleMutation,
+  useUpdateVehicleMutation,
+  useDeleteVehicleMutation,
+  //activity logs
   useGetActivityLogsQuery,
 } = api;

@@ -9,29 +9,22 @@ import DefaultButton from "@/components/atoms/Button";
 import Error404 from "@/components/molecules/Error404";
 import Loading from "@/components/molecules/Loading";
 import { formatDate } from "@/helpers";
-import {
-  useDeleteInventoryMutation,
-  useGetInventoryQuery,
-} from "@/services/api";
+import { useDeleteGroupMutation, useGetGroupsQuery } from "@/services/api";
 import { useRouter } from "next/navigation";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
-  { label: "Item Name", tooltip: "", icon: "" },
-  { label: "Amount", tooltip: "", icon: "" },
-  { label: "Type", tooltip: "", icon: "" },
-  { label: "Category", tooltip: "", icon: "" },
-  { label: "Location", tooltip: "", icon: "" },
-  { label: "Minimum Stock", tooltip: "", icon: "" },
-  { label: "Description", tooltip: "", icon: "" },
-  { label: "Added Date", tooltip: "", icon: "" },
-  { label: "Last Updated", tooltip: "", icon: "" },
+  { label: "Nama Group", tooltip: "", icon: "" },
+  { label: "Deskripsi", tooltip: "", icon: "" },
+  { label: "Status", tooltip: "", icon: "" },
+  { label: "Tanggal Ditambahkan", tooltip: "", icon: "" },
+  { label: "Tanggal Terakhir Diubah", tooltip: "", icon: "" },
 ];
 
-export default function InventoryOverview() {
+export default function GroupOverview() {
   const router = useRouter();
-  const [inventoryList, setInventoryList] = useState([]);
+  const [groupList, setGroupList] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [selectedId, setSelectedId] = useState(1);
@@ -52,36 +45,29 @@ export default function InventoryOverview() {
     page: number;
     totalData: number;
   });
+  const { data: groupData, error, isLoading } = useGetGroupsQuery(filter);
+  const [deleteGroup] = useDeleteGroupMutation();
 
-  const {
-    data: inventoryData,
-    error,
-    isLoading,
-  } = useGetInventoryQuery(filter);
-  const [deleteInventory] = useDeleteInventoryMutation();
-
-  const inventory = useMemo(
-    () => inventoryData?.data?.inventory || [],
-    [inventoryData?.data?.inventory]
+  const groups = useMemo(
+    () => groupData?.data?.groups || [],
+    [groupData?.data?.groups]
   );
 
   useEffect(() => {
-    if (inventoryData?.data) {
-      const currentData = inventoryData?.data;
+    if (groupData?.data) {
+      const currentData = groupData?.data;
       setFilter({ ...filter, totalData: currentData?.totalData || 0 });
     }
-  }, [inventoryData?.data]);
+  }, [groupData?.data]);
 
   useEffect(() => {
-    const mappedData: any = inventory.map((item: any) => ({
+    const mappedData: any = groups.map((item: any) => ({
       "": (
         <div className="flex justify-center items-center gap-2 cursor-pointer">
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
             role="button"
-            onClick={() =>
-              router.push(`/workspace/inventories/${item?.id}/edit`)
-            }
+            onClick={() => router.push(`/workspace/groups/${item?.id}/edit`)}
           ></i>
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
@@ -89,18 +75,21 @@ export default function InventoryOverview() {
           ></i>
         </div>
       ),
-      "Item Name": item?.name || "N/A",
-      Amount: item?.amount || "N/A",
-      Type: item?.type?.name || "N/A",
-      Category: item?.category?.name || "N/A",
-      Location: item?.location?.name || "N/A",
-      "Minimum Stock": item?.minimumStock || "N/A",
-      Description: item?.description || "N/A",
-      "Added Date": formatDate(item?.createdAt) || "N/A",
-      "Last Updated": formatDate(item?.updatedAt) || "N/A",
+      "Nama Grup": item?.name || "N/A",
+      Deskripsi: item?.description || "N/A",
+      Status:
+        item?.status == "active" ? (
+          <Badge appearance="success" text="Active" type="outline" />
+        ) : item?.status == "pending" ? (
+          <Badge appearance="warning" text="Pending" type="outline" />
+        ) : (
+          <Badge appearance="danger" text="Inactive" type="outline" />
+        ),
+      "Tanggal Ditambahkan": formatDate(item?.createdAt) || "N/A",
+      "Tanggal Terakhir Diubah": formatDate(item?.updatedAt) || "N/A",
     }));
-    setInventoryList(mappedData);
-  }, [inventory]);
+    setGroupList(mappedData);
+  }, [groups]);
 
   const handleDelete = async (id: number) => {
     setOpenModal(true);
@@ -109,24 +98,24 @@ export default function InventoryOverview() {
 
   const _executeDelete = async () => {
     try {
-      await deleteInventory(selectedId).unwrap();
+      await deleteGroup(selectedId).unwrap();
       setStatusMessage({
-        message: "Inventory item deleted successfully!",
+        message: "Group deleted successfully!",
         type: "Success",
       });
       setOpenModal(false);
       setSuccessModal(true);
       setTimeout(() => {
-        router.push("/workspace/inventories");
+        router.push("/workspace/groups");
       }, 3000);
     } catch (error) {
       setOpenModal(false);
       setStatusMessage({
-        message: "Error deleting inventory item",
+        message: "Error deleting group",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Error deleting inventory item:", error);
+      console.error("Error deleting group:", error);
     }
   };
 
@@ -139,10 +128,10 @@ export default function InventoryOverview() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Inventory Overview
+              Master Data Grup
             </h1>
             <p className="text-base text-gray-600 px-0.5 pb-3">
-              Manage your inventory items.
+              Fitur untuk mengelola grup.
             </p>
           </div>
           <div className="space-x-2">
@@ -155,10 +144,10 @@ export default function InventoryOverview() {
             <DefaultButton
               type="pill"
               appearance="primary"
-              text="Add New Item"
+              text="Tambah Grup"
               icon="ki-plus-squared"
               className="cursor-pointer"
-              onClick={() => router.push("/workspace/inventories/add")}
+              onClick={() => router.push("/workspace/groups/add")}
             />
           </div>
         </div>
@@ -166,9 +155,9 @@ export default function InventoryOverview() {
       <div className="px-10 overflow-auto bg-transparent pt-4 sm:px-6 lg:px-8 mt-2">
         <div className="flex max-w-full">
           <DataTable
-            title="Inventory List"
+            title="Pustaka Grup"
             columns={columns}
-            data={inventoryList}
+            data={groupList}
             filter={filter}
             setFilter={setFilter}
             className="w-full"
@@ -179,7 +168,7 @@ export default function InventoryOverview() {
         <ConfirmationModal
           showModal={openModal}
           title="Confirmation"
-          message="Are you sure you want to delete this inventory item?"
+          message="Are you sure you want to delete this group?"
           buttonText="Confirm"
           buttonColor="btn-danger"
           handleClose={() => setOpenModal(false)}

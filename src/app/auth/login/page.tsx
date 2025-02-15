@@ -6,6 +6,7 @@ import { useLoginMutation } from "@/services/authApi";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Grid } from "lucide-react";
 
 export default function Login() {
   const router = useRouter();
@@ -32,9 +33,29 @@ export default function Login() {
   }, [searchParams]);
 
   const validateForm = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordMinLength = 8;
+
     const newErrors = {
-      email: email ? "" : "Email is required.",
-      password: password ? "" : "Password is required.",
+      email: !email
+        ? "Email is required."
+        : !emailRegex.test(email)
+        ? "Invalid email format."
+        : "",
+
+      password: !password
+        ? "Password is required."
+        : // : password.length < passwordMinLength
+          // ? `Password must be at least ${passwordMinLength} characters long.`
+          // : !/[A-Z]/.test(password)
+          // ? "Password must contain at least one uppercase letter."
+          // : !/[a-z]/.test(password)
+          // ? "Password must contain at least one lowercase letter."
+          // : !/\d/.test(password)
+          // ? "Password must contain at least one number."
+          // : !/[!@#$%^&*(),.?":{}|<>]/.test(password)
+          // ? "Password must contain at least one special character."
+          "",
     };
 
     setErrors(newErrors);
@@ -64,13 +85,18 @@ export default function Login() {
         if (urls) {
           router.push(`${urls}?token=${token}`);
         } else {
-          router.push(`/workspace/dashboard`);
+          router.push(`/workspace/employees`);
         }
       }, 3000);
 
       setTimeout(() => {}, 1000);
     } catch (err: any) {
-      alert("Error");
+      console.log(err);
+      setStatusMessage({
+        message: err?.data?.message || "An error occurred. Please try again.",
+        type: "Error",
+      });
+      setSuccessModal(true);
     }
   };
 
@@ -93,12 +119,22 @@ export default function Login() {
           backgroundPosition: "center",
         }}
       >
-        <Card isScrollable={true} height="500px">
-          <div className="w-full px-10 mt-5 mb-5 flex justify-center pb-5 pt-2 border-b-[1px] border-gray-300">
-            <h3 className="text-3xl font-bold ">Karoseri Super App</h3>
+        <Card height="500px">
+          <div className={`flex items-center ml-10 mb-5 mt-5`}>
+            <div className="me-2 flex h-[40px] w-[40px] items-center justify-center rounded-md bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
+              <Grid className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col">
+              <h5 className="me-2 text-2xl font-bold leading-5 text-zinc-950 dark:text-white">
+                Karoseri
+              </h5>
+              <p className="font-semibold text-sm text-zinc-950 dark:text-white">
+                Super App
+              </p>
+            </div>
           </div>
           <form
-            className="w-full h-full flex flex-col px-10"
+            className="w-full h-full flex flex-col px-10 pb-8"
             onSubmit={handleLogin}
           >
             <h1 className="text-xl font-bold text-gray-800 mb-5 text-left">
@@ -110,11 +146,14 @@ export default function Login() {
               </label>
               <InputText
                 className="w-full rounded-md"
-                type="email"
+                type="text"
                 size="lg"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setErrors({ ...errors, email: "" });
+                  setEmail(e.target.value);
+                }}
                 error={errors.email}
               />
             </div>
@@ -128,8 +167,11 @@ export default function Login() {
                 size="lg"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                error={errors.email}
+                onChange={(e) => {
+                  setErrors({ ...errors, password: "" });
+                  setPassword(e.target.value);
+                }}
+                error={errors.password}
               />
             </div>
             <button

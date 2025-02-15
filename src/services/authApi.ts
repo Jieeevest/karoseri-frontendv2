@@ -1,6 +1,4 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-// Define interfaces for Auth API
 export interface LoginResponse {
   data: {
     token: string;
@@ -27,7 +25,7 @@ export interface ForgetPasswordRequest {
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.NEXT_PUBLIC_AUTH_API_URL}/api`, // Different base URL for auth
+    baseUrl: `${process.env.NEXT_PUBLIC_AUTH_API_URL}/api/v1`, // Different base URL for auth
     prepareHeaders: (headers, { endpoint }) => {
       if (endpoint === "getUser") {
         const token = localStorage.getItem("accessToken");

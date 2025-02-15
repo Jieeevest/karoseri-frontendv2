@@ -7,7 +7,7 @@ import {
   SuccessModal,
 } from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
-import { useCreateRoleMutation } from "@/services/api";
+import { useCreateMenuMutation, useCreateRoleMutation } from "@/services/api";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { Fragment, useState } from "react";
