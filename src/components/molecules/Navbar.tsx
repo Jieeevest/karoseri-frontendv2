@@ -1,22 +1,34 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const Navbar: React.FC = () => {
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [user, setUser] = useState<{
+    name: string | null;
+    email: string | null;
+  }>({
+    name: null,
+    email: null,
+  });
+
+  // Ambil data user dari localStorage setelah komponen di-mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setUser({
+        name: localStorage.getItem("userName"),
+        email: localStorage.getItem("userEmail"),
+      });
+    }
+  }, []);
+
   const toggleDropdown = () => setIsDropdownOpen((prev) => !prev);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     router.push("/auth/login");
-  };
-
-  const user = {
-    name: localStorage.getItem("userName"),
-    email: localStorage.getItem("userEmail"),
-    image: "https://randomuser.me/api/portraits/men/1.jpg",
   };
 
   return (
@@ -46,7 +58,7 @@ const Navbar: React.FC = () => {
                 alt="Profile"
                 className="w-8 h-8 rounded-full"
               />
-              <span className="">{user.name}</span>
+              <span className="">{user.name || "Guest"}</span>
             </div>
 
             {/* Dropdown Menu */}
@@ -65,9 +77,11 @@ const Navbar: React.FC = () => {
                       />
                       <div className="pb-2">
                         <span className="text-gray-700 font-semibold">
-                          {user.name}
+                          {user.name || "Guest"}
                         </span>
-                        <p className="text-gray-700 text-xs">{user.email}</p>
+                        <p className="text-gray-700 text-xs">
+                          {user.email || "No Email"}
+                        </p>
                       </div>
                     </div>
                   </Link>
