@@ -10,7 +10,7 @@ const UrlFetcher = ({ setUrls }: { setUrls: (url: string | null) => void }) => {
 
   useEffect(() => {
     if (urlsParam) {
-      setUrls(`https://${urlsParam}`);
+      setUrls(`http://${urlsParam}`);
     }
   }, [urlsParam]);
 
