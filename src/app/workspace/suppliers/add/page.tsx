@@ -5,17 +5,29 @@ import {
   SuccessModal,
   ConfirmationModal,
   TextArea,
-  Select,
 } from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
+import Loading from "@/components/molecules/Loading";
 import { useCreateSupplierMutation } from "@/services/api"; // Assuming you have this mutation created
 import { useRouter } from "next/navigation";
 import React, { Fragment, useState } from "react";
+import dynamic from "next/dynamic";
+
+const CustomSelect = dynamic(() => import("@/components/atoms/Select"), {
+  ssr: false,
+  loading: () => <Loading />,
+});
 
 interface PayloadType {
   name?: string;
-  category?: string;
-  bank?: string;
+  category?: {
+    label: string;
+    value: string;
+  } | null;
+  bank?: {
+    label: string;
+    value: string;
+  } | null;
   bankNumber?: string;
   bankOwner?: string;
   phoneNumber?: string;
@@ -35,8 +47,8 @@ export default function AddNewSupplier() {
   });
   const [payload, setPayload] = useState<PayloadType>({
     name: "",
-    category: "",
-    bank: "",
+    category: null,
+    bank: null,
     bankNumber: "",
     bankOwner: "",
     phoneNumber: "",
@@ -172,55 +184,53 @@ export default function AddNewSupplier() {
                     onChange={(e) => handleChange("name", e.target.value)}
                     error={errors.name}
                   />
-                  <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 w-[600px]">
-                    <label className="form-label max-w-44">
-                      Kategori
-                      <span className="text-danger">*</span>
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        className="w-full"
-                        value={String(payload.category) || ""}
-                        onChange={(e) =>
-                          handleChange("category", e.target.value)
-                        }
-                        optionValue={[
-                          { label: "PPN", value: "ppn" },
-                          { label: "Non PPN", value: "non-ppn" },
-                        ]}
-                      />
-                      {errors && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.category}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 w-[600px]">
-                    <label className="form-label max-w-44">
-                      Bank
-                      <span className="text-danger">*</span>
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        className="w-full"
-                        value={String(payload.bank) || ""}
-                        onChange={(e) => handleChange("bank", e.target.value)}
-                        optionValue={[
-                          { label: "BCA", value: "bca" },
-                          { label: "BRI", value: "bri" },
-                          { label: "Mandiri", value: "mandiri" },
-                          { label: "BNI", value: "bni" },
-                          { label: "Other", value: "other" },
-                        ]}
-                      />
-                      {errors && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.bank}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  <CustomSelect
+                    label="Kategori"
+                    required={true}
+                    placeholder="Pilih Kategori"
+                    size="sm"
+                    className="w-full"
+                    value={
+                      payload.category
+                        ? {
+                            label: payload?.category?.label || "",
+                            value: payload?.category?.value || "",
+                          }
+                        : null
+                    }
+                    onChange={(value) => handleChange("category", value)}
+                    optionValue={[
+                      { label: "PPN", value: "ppn" },
+                      { label: "Non PPN", value: "non-ppn" },
+                    ]}
+                    error={errors.category}
+                  />
+
+                  <CustomSelect
+                    label="Bank"
+                    required={true}
+                    placeholder="Pilih Bank"
+                    size="sm"
+                    className="w-full"
+                    value={
+                      payload.bank
+                        ? {
+                            label: payload?.bank?.label || "",
+                            value: payload?.bank?.value || "",
+                          }
+                        : null
+                    }
+                    onChange={(value) => handleChange("bank", value)}
+                    optionValue={[
+                      { label: "BCA", value: "bca" },
+                      { label: "BRI", value: "bri" },
+                      { label: "Mandiri", value: "mandiri" },
+                      { label: "BNI", value: "bni" },
+                      { label: "Other", value: "other" },
+                    ]}
+                    error={errors.bank}
+                  />
+
                   <InputText
                     type="text"
                     label="Nomor Rekening"

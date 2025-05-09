@@ -139,10 +139,10 @@ export default function InventoryOverview() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Inventory Overview
+              Master Data Inventaris
             </h1>
             <p className="text-base text-gray-600 px-0.5 pb-3">
-              Manage your inventory items.
+              Fitur untuk mengelola inventaris.
             </p>
           </div>
           <div className="space-x-2">

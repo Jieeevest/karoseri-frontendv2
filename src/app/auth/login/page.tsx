@@ -70,7 +70,7 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full h-screen absolute overflow-hidden flex justify-center items-center">
+    <div className="w-full h-screen absolute overflow-hidden flex justify-center items-center bg-gradient-to-br from-slate-700 to-slate-600">
       <Suspense fallback={null}>
         <UrlFetcher setUrls={setUrls} />
       </Suspense>
@@ -78,15 +78,15 @@ export default function Login() {
       <div className="w-[500px] rounded-lg shadow-lg">
         <Card height="500px">
           <form
-            className="w-full h-full flex flex-col px-10 pb-8"
+            className="w-full h-full flex flex-col px-10 pb-8 pt-4"
             onSubmit={handleLogin}
           >
             <h1 className="text-xl font-bold text-gray-800 mb-5 text-left">
-              Welcome Back!
+              SIGN IN
             </h1>
             <div className="flex flex-col gap-4 w-full">
               <label className="text-gray-700 font-semibold">
-                Work Email<span className="text-danger">*</span>
+                Email<span className="text-danger">*</span>
               </label>
               <InputText
                 className="w-full rounded-md"
@@ -121,11 +121,16 @@ export default function Login() {
             <button
               type="submit"
               className={`w-full py-2 mt-6 rounded-md ${
-                isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500"
+                isLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-600"
               } text-white`}
               disabled={isLoading}
             >
-              {isLoading ? "Signing In..." : "Sign In"}
+              <p className="flex items-center justify-center gap-1">
+                {isLoading ? "Signing In..." : "Sign In"}
+                <i className="ki-outline ki-arrow-right text-white"></i>
+              </p>
             </button>
           </form>
         </Card>

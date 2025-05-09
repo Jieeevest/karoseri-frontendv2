@@ -3,15 +3,27 @@ import {
   Card,
   ConfirmationModal,
   InputText,
-  Select,
   SuccessModal,
   TextArea,
 } from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
-import { useCreateEmployeeMutation } from "@/services/api";
+import {
+  useCreateEmployeeMutation,
+  useGetGroupsQuery,
+  useGetPositionsQuery,
+  useGetRolesQuery,
+} from "@/services/api";
 import { useRouter } from "next/navigation";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useMemo, useState } from "react";
 import { nationalities } from "@/app/constants/nationalities";
+
+import dynamic from "next/dynamic";
+import Loading from "@/components/molecules/Loading";
+
+const CustomSelect = dynamic(() => import("@/components/atoms/Select"), {
+  ssr: false,
+  loading: () => <Loading />,
+});
 
 interface PayloadType {
   nik: string;
@@ -25,16 +37,52 @@ interface PayloadType {
   homeAddress?: string;
   birthPlace?: string;
   birthDate?: string;
-  gender?: string;
-  nationality?: string;
-  religion?: string;
-  maritalStatus?: string;
-  positionId: number | null;
-  roleId: number | null;
-  groupId: number | null;
+  gender?: {
+    label: string;
+    value: string;
+  } | null;
+  nationality?: {
+    label: string;
+    value: string;
+  } | null;
+  religion?: {
+    label: string;
+    value: string;
+  } | null;
+  maritalStatus?: {
+    label: string;
+    value: string;
+  } | null;
+  positionId?: {
+    label: string;
+    value: string;
+  } | null;
+  roleId?: {
+    label: string;
+    value: string;
+  } | null;
+  groupId?: {
+    label: string;
+    value: string;
+  } | null;
   createdAt?: string;
   updatedAt?: string;
 }
+
+const filter = {
+  keyword: "",
+  status: "active",
+  pageSize: 5,
+  page: 1,
+  totalData: 0,
+} as {
+  keyword: string;
+  status: string;
+  pageSize: number;
+  page: number;
+  totalData: number;
+};
+
 export default function AddNewRole() {
   const router = useRouter();
   const [openModal, setOpenModal] = useState(false);
@@ -55,10 +103,10 @@ export default function AddNewRole() {
     homeAddress: "",
     birthPlace: "",
     birthDate: "",
-    gender: "",
-    nationality: "",
-    religion: "",
-    maritalStatus: "",
+    gender: null,
+    nationality: null,
+    religion: null,
+    maritalStatus: null,
     positionId: null,
     roleId: null,
     groupId: null,
@@ -87,6 +135,26 @@ export default function AddNewRole() {
   });
 
   const [createEmployee] = useCreateEmployeeMutation();
+  const { data: positionData, isLoading: isLoadingPosition } =
+    useGetPositionsQuery(filter);
+  const { data: roleData, isLoading: isLoadingRole } = useGetRolesQuery(filter);
+  const { data: groupData, isLoading: isLoadingGroup } =
+    useGetGroupsQuery(filter);
+
+  const positions = useMemo(
+    () => positionData?.data?.positions || [],
+    [positionData?.data?.positions]
+  );
+
+  const roles = useMemo(
+    () => roleData?.data?.roles || [],
+    [roleData?.data?.roles]
+  );
+
+  const groups = useMemo(
+    () => groupData?.data?.groups || [],
+    [groupData?.data?.groups]
+  );
 
   const handleChange = (key: string, value: any) => {
     if (value) setErrors((prev) => ({ ...prev, [key]: "" }));
@@ -150,7 +218,17 @@ export default function AddNewRole() {
 
   const _executeSubmit = async () => {
     try {
-      await createEmployee(payload).unwrap();
+      const objectPayload = {
+        ...payload,
+        gender: payload.gender?.value,
+        nationality: payload.nationality?.value,
+        religion: payload.religion?.value,
+        maritalStatus: payload.maritalStatus?.value,
+        positionId: Number(payload.positionId?.value),
+        roleId: Number(payload.roleId?.value),
+        groupId: Number(payload.groupId?.value),
+      };
+      await createEmployee(objectPayload).unwrap();
       setStatusMessage({
         message: "Penambahan karyawan berhasil!",
         type: "Success",
@@ -166,6 +244,9 @@ export default function AddNewRole() {
       console.error("Gagal menambahkan karyawan:", error);
     }
   };
+
+  if (isLoadingPosition || isLoadingRole || isLoadingGroup) return <Loading />;
+
   return (
     <Fragment>
       <div className="pb-10 -mt-5 overflow-auto">
@@ -281,131 +362,122 @@ export default function AddNewRole() {
                       />
                     </div>
                   </div>
-                  <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 w-[600px]">
-                    <label className="form-label max-w-44">
-                      Jenis Kelamin
-                      <span className="text-danger">*</span>
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        className="w-full"
-                        value={String(payload.gender) || ""}
-                        onChange={(e) => handleChange("gender", e.target.value)}
-                        optionValue={[
-                          {
-                            label: "Laki-laki",
-                            value: "male",
-                          },
-                          {
-                            label: "Perempuan",
-                            value: "female",
-                          },
-                        ]}
-                      />
-                      {errors && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.gender}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 w-[600px]">
-                    <label className="form-label max-w-44">
-                      Kebangsaan
-                      <span className="text-danger">*</span>
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        className="w-full"
-                        value={String(payload.nationality) || ""}
-                        onChange={(e) =>
-                          handleChange("nationality", e.target.value)
-                        }
-                        optionValue={nationalities}
-                      />
-                      {errors && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.nationality}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 w-[600px]">
-                    <label className="form-label max-w-44">
-                      Agama
-                      <span className="text-danger">*</span>
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        className="w-full"
-                        value={String(payload.religion) || ""}
-                        onChange={(e) =>
-                          handleChange("religion", e.target.value)
-                        }
-                        optionValue={[
-                          {
-                            label: "Islam",
-                            value: "islam",
-                          },
-                          {
-                            label: "Kristen",
-                            value: "kristen",
-                          },
-                          {
-                            label: "Hindu",
-                            value: "hindu",
-                          },
-                          {
-                            label: "Budha",
-                            value: "budha",
-                          },
-                          {
-                            label: "Konghucu",
-                            value: "konghucu",
-                          },
-                          {
-                            label: "Lainnya",
-                            value: "lainnya",
-                          },
-                        ]}
-                      />
-                      {errors && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.religion}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 w-[600px]">
-                    <label className="form-label max-w-44">
-                      Status Pernikahan
-                      <span className="text-danger">*</span>
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        className="w-full"
-                        value={String(payload.maritalStatus) || ""}
-                        onChange={(e) =>
-                          handleChange("maritalStatus", e.target.value)
-                        }
-                        optionValue={[
-                          {
-                            label: "Menikah",
-                            value: "menikah",
-                          },
-                          {
-                            label: "Belum Menikah",
-                            value: "belum-menikah",
-                          },
-                        ]}
-                      />
-                      {errors && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.maritalStatus}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  <CustomSelect
+                    label="Jenis Kelamin"
+                    required={true}
+                    className="w-full"
+                    placeholder="Pilih Jenis Kelamin"
+                    size="sm"
+                    value={
+                      payload.gender
+                        ? {
+                            label: payload?.gender?.label || "",
+                            value: payload?.gender?.value || "",
+                          }
+                        : null
+                    }
+                    onChange={(value) => handleChange("gender", value)}
+                    optionValue={[
+                      {
+                        label: "Laki-laki",
+                        value: "male",
+                      },
+                      {
+                        label: "Perempuan",
+                        value: "female",
+                      },
+                    ]}
+                    error={errors.gender}
+                  />
+
+                  <CustomSelect
+                    label="Kebangsaan"
+                    required={true}
+                    className="w-full"
+                    placeholder="Pilih Kebangsaan"
+                    size="sm"
+                    value={
+                      payload.nationality
+                        ? {
+                            label: payload?.nationality?.label || "",
+                            value: payload?.nationality?.value || "",
+                          }
+                        : null
+                    }
+                    onChange={(value) => handleChange("nationality", value)}
+                    optionValue={nationalities}
+                    error={errors.nationality}
+                  />
+                  <CustomSelect
+                    label="Agama"
+                    required={true}
+                    className="w-full"
+                    placeholder="Pilih Agama"
+                    size="sm"
+                    value={
+                      payload.religion
+                        ? {
+                            label: payload?.religion?.label || "",
+                            value: payload?.religion?.value || "",
+                          }
+                        : null
+                    }
+                    onChange={(value) => handleChange("religion", value)}
+                    optionValue={[
+                      {
+                        label: "Islam",
+                        value: "islam",
+                      },
+                      {
+                        label: "Kristen",
+                        value: "kristen",
+                      },
+                      {
+                        label: "Hindu",
+                        value: "hindu",
+                      },
+                      {
+                        label: "Budha",
+                        value: "budha",
+                      },
+                      {
+                        label: "Konghucu",
+                        value: "konghucu",
+                      },
+                      {
+                        label: "Lainnya",
+                        value: "lainnya",
+                      },
+                    ]}
+                    error={errors.religion}
+                  />
+                  <CustomSelect
+                    label="Status Pernikahan"
+                    required={true}
+                    className="w-full"
+                    placeholder="Pilih Status Pernikahan"
+                    size="sm"
+                    value={
+                      payload.maritalStatus
+                        ? {
+                            label: payload?.maritalStatus?.label || "",
+                            value: payload?.maritalStatus?.value || "",
+                          }
+                        : null
+                    }
+                    onChange={(value) => handleChange("maritalStatus", value)}
+                    optionValue={[
+                      {
+                        label: "Menikah",
+                        value: "menikah",
+                      },
+                      {
+                        label: "Belum Menikah",
+                        value: "belum-menikah",
+                      },
+                    ]}
+                    error={errors.maritalStatus}
+                  />
                 </div>
                 {/* Right Column */}
                 <div className="w-[600px] space-y-4 my-4">
@@ -464,80 +536,70 @@ export default function AddNewRole() {
                     value={payload.homeAddress}
                     error={errors.homeAddress}
                   />
+                  <CustomSelect
+                    label="Jabatan"
+                    required={true}
+                    className="w-full"
+                    placeholder="Pilih Jabatan"
+                    size="sm"
+                    value={
+                      payload.positionId
+                        ? {
+                            label: payload?.positionId?.label || "",
+                            value: payload?.positionId?.value || "",
+                          }
+                        : null
+                    }
+                    onChange={(value) => handleChange("positionId", value)}
+                    optionValue={positions?.map((position: any) => ({
+                      label: position.name,
+                      value: position.id,
+                    }))}
+                    error={errors.positionId}
+                  />
 
-                  <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 w-[600px]">
-                    <label className="form-label max-w-44">
-                      Jabatan
-                      <span className="text-danger">*</span>
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        className="w-full"
-                        value={String(payload.positionId) || ""}
-                        onChange={(e) =>
-                          handleChange("positionId", e.target.value)
-                        }
-                        optionValue={[
-                          { label: "Posisi 1", value: "posisi-1" },
-                          { label: "Posisi 2", value: "posisi-2" },
-                          { label: "Posisi 3", value: "posisi-3" },
-                        ]}
-                      />
-                      {errors && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.positionId}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 w-[600px]">
-                    <label className="form-label max-w-44">
-                      Role
-                      <span className="text-danger">*</span>
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        className="w-full"
-                        value={String(payload.roleId) || ""}
-                        onChange={(e) => handleChange("roleId", e.target.value)}
-                        optionValue={[
-                          { label: "Role 1", value: "role-1" },
-                          { label: "Role 2", value: "role-2" },
-                          { label: "Role 3", value: "role-3" },
-                        ]}
-                      />
-                      {errors && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.roleId}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 w-[600px]">
-                    <label className="form-label max-w-44">
-                      Group
-                      <span className="text-danger">*</span>
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        className="w-full"
-                        value={String(payload.groupId) || ""}
-                        onChange={(e) =>
-                          handleChange("groupId", e.target.value)
-                        }
-                        optionValue={[
-                          { label: "Group 1", value: "group-1" },
-                          { label: "Group 2", value: "group-2" },
-                          { label: "Group 3", value: "group-3" },
-                        ]}
-                      />
-                      {errors && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.groupId}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  <CustomSelect
+                    label="Role"
+                    required={true}
+                    className="w-full"
+                    placeholder="Pilih Role"
+                    size="sm"
+                    value={
+                      payload.roleId
+                        ? {
+                            label: payload?.roleId?.label || "",
+                            value: payload?.roleId?.value || "",
+                          }
+                        : null
+                    }
+                    onChange={(value) => handleChange("roleId", value)}
+                    optionValue={roles?.map((role: any) => ({
+                      label: role.name,
+                      value: role.id,
+                    }))}
+                    error={errors.roleId}
+                  />
+                  <CustomSelect
+                    label="Grup"
+                    required={true}
+                    className="w-full"
+                    placeholder="Pilih Grup"
+                    size="sm"
+                    value={
+                      payload.groupId
+                        ? {
+                            label: payload?.groupId?.label || "",
+                            value: payload?.groupId?.value || "",
+                          }
+                        : null
+                    }
+                    onChange={(value) => handleChange("groupId", value)}
+                    optionValue={groups?.map((group: any) => ({
+                      label: group.name,
+                      value: group.id,
+                    }))}
+                    error={errors.groupId}
+                  />
                 </div>
               </div>
             </Card>

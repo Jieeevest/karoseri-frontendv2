@@ -14,6 +14,7 @@ interface ButtonProps {
   icon?: string;
   onClick?: () => void;
   className?: string;
+  isDisabled?: boolean;
 }
 
 const DefaultButton: React.FC<ButtonProps> = ({
@@ -23,6 +24,7 @@ const DefaultButton: React.FC<ButtonProps> = ({
   icon,
   onClick,
   className = "",
+  isDisabled,
 }) => {
   const buttonType = {
     default: "",
@@ -33,6 +35,7 @@ const DefaultButton: React.FC<ButtonProps> = ({
     <button
       className={`${className} btn btn-${appearance} ${buttonType[type]}`}
       onClick={onClick}
+      disabled={isDisabled}
     >
       {icon && <i className={`ki-outline ${icon}`}></i>}
       {text}

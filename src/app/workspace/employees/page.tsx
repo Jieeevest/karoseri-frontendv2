@@ -4,11 +4,10 @@ import {
   ConfirmationModal,
   DataTable,
   SuccessModal,
+  Button,
 } from "@/components/atoms";
-import DefaultButton from "@/components/atoms/Button";
 import Error404 from "@/components/molecules/Error404";
 import Loading from "@/components/molecules/Loading";
-import { formatDate } from "@/helpers";
 import {
   EmployeeData,
   useDeleteEmployeeMutation,
@@ -33,6 +32,7 @@ export default function EmployeesOverview() {
   const router = useRouter();
   const [employeeList, setEmployeeList] = useState([]);
   const [openModal, setOpenModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [selectedId, setSelectedId] = useState(1);
   const [statusMessage, setStatusMessage] = useState({
@@ -52,7 +52,12 @@ export default function EmployeesOverview() {
     page: number;
     totalData: number;
   });
-  const { data: employeeData, error, isLoading } = useGetEmployeesQuery(filter);
+  const {
+    data: employeeData,
+    error,
+    isLoading,
+    refetch,
+  } = useGetEmployeesQuery(filter);
   const [deleteEmployee] = useDeleteEmployeeMutation();
 
   const employees = useMemo(
@@ -68,24 +73,29 @@ export default function EmployeesOverview() {
   }, [employeeData?.data?.employees]);
 
   useEffect(() => {
+    refetch();
+  }, []);
+
+  useEffect(() => {
     const mappedData: any = employees.map((employee: EmployeeData) => ({
       "": (
         <div className="flex justify-center items-center gap-2 cursor-pointer">
-          {employee?.id == 1 && (
-            <>
-              <i
-                className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
-                role="button"
-                onClick={() =>
-                  router.push(`/workspace/employees/${employee?.id}/edit`)
-                }
-              ></i>
-              <i
-                className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
-                onClick={() => handleDelete(employee?.id)}
-              ></i>
-            </>
-          )}
+          {/* {employee?.role?.id == 1 && ( */}
+          <>
+            <i
+              className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
+              role="button"
+              onClick={() => {
+                setLoading(true);
+                router.push(`/workspace/employees/${employee?.id}/edit`);
+              }}
+            ></i>
+            <i
+              className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
+              onClick={() => handleDelete(employee?.id)}
+            ></i>
+          </>
+          {/* )} */}
         </div>
       ),
       NIK: employee?.nik || "-",
@@ -111,7 +121,7 @@ export default function EmployeesOverview() {
     }));
 
     setEmployeeList(mappedData);
-  }, [employees]);
+  }, [employees, refetch]);
 
   const handleDelete = async (id: number) => {
     setOpenModal(true);
@@ -119,18 +129,23 @@ export default function EmployeesOverview() {
   };
 
   const _executeDelete = async () => {
+    setLoading(true);
     try {
-      await deleteEmployee(selectedId).unwrap();
-      setStatusMessage({
-        message: "Employee deleted successfully!",
-        type: "Success",
-      });
-      setOpenModal(false);
-      setSuccessModal(true);
-      setTimeout(() => {
-        router.push("/workspace/employees");
-      }, 3000);
+      await deleteEmployee(selectedId)
+        .unwrap()
+        .then(() => {
+          refetch();
+          setLoading(false);
+          setStatusMessage({
+            message: "Employee deleted successfully!",
+            type: "Success",
+          });
+          setOpenModal(false);
+          setSuccessModal(true);
+        });
     } catch (error) {
+      refetch();
+      setLoading(false);
       setOpenModal(false);
       setStatusMessage({
         message: "Error deleting employee",
@@ -141,7 +156,7 @@ export default function EmployeesOverview() {
     }
   };
 
-  if (isLoading) return <Loading />;
+  if (isLoading || loading) return <Loading />;
   if (error) return <Error404 />;
 
   return (
@@ -157,19 +172,23 @@ export default function EmployeesOverview() {
             </p>
           </div>
           <div className="space-x-2">
-            <DefaultButton
+            {/* <Button
               type="pill"
               appearance="dark"
               text="Riwayat Perubahan"
               icon="ki-archive-tick"
-            />
-            <DefaultButton
+              isDisabled={true}
+            /> */}
+            <Button
               type="pill"
               appearance="primary"
               text="Tambah Karyawan"
               icon="ki-plus-squared"
               className="cursor-pointer"
-              onClick={() => router.push("/workspace/employees/add")}
+              onClick={() => {
+                setLoading(true);
+                router.push("/workspace/employees/add");
+              }}
             />
           </div>
         </div>

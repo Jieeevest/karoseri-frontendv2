@@ -1,9 +1,15 @@
 import React from "react";
+import dynamic from "next/dynamic";
+
 import InputText from "./InputText";
 import DefaultButton from "./Button";
-import Select from "./Select";
-import Pagination from "./Pagination";
 import PaginationData from "../molecules/Pagination";
+import Loading from "../molecules/Loading";
+
+const CustomSelect = dynamic(() => import("@/components/atoms/Select"), {
+  ssr: false,
+  loading: () => <Loading />,
+});
 
 // Define types for column and row data
 interface Column {
@@ -19,7 +25,7 @@ interface DataTableProps {
   data: any;
   filter?: {
     keyword: string;
-    status: string;
+    status: any;
     pageSize: number;
     page: number;
     totalData: number;
@@ -52,12 +58,21 @@ const DataTable: React.FC<DataTableProps> = ({
                 }
                 value={filter?.keyword || ""}
               />
-              <Select
+              <CustomSelect
+                placeholder="Pilih status"
+                size="sm"
                 className="w-40"
-                onChange={(e) =>
-                  setFilter && setFilter({ ...filter, status: e.target.value })
+                onChange={(value) =>
+                  setFilter && setFilter({ ...filter, status: value.value })
                 }
-                value={filter?.status || ""}
+                value={
+                  filter?.status
+                    ? {
+                        label: filter?.status?.label || "Active",
+                        value: filter?.status?.value || "active",
+                      }
+                    : null
+                }
                 optionValue={[
                   { label: "Active", value: "active" },
                   { label: "Pending", value: "pending" },

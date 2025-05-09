@@ -140,12 +140,12 @@ export default function PositionOverview() {
             </p>
           </div>
           <div className="space-x-2">
-            <DefaultButton
+            {/* <DefaultButton
               type="pill"
               appearance="dark"
               text="Riwayat Perubahan"
               icon="ki-archive-tick"
-            />
+            /> */}
             <DefaultButton
               type="pill"
               appearance="primary"

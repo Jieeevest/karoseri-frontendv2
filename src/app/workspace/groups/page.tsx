@@ -15,7 +15,7 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
-  { label: "Nama Group", tooltip: "", icon: "" },
+  { label: "Nama Grup", tooltip: "", icon: "" },
   { label: "Deskripsi", tooltip: "", icon: "" },
   { label: "Status", tooltip: "", icon: "" },
   { label: "Tanggal Ditambahkan", tooltip: "", icon: "" },
@@ -135,12 +135,12 @@ export default function GroupOverview() {
             </p>
           </div>
           <div className="space-x-2">
-            <DefaultButton
+            {/* <DefaultButton
               type="pill"
               appearance="dark"
               text="Riwayat Perubahan"
               icon="ki-archive-tick"
-            />
+            /> */}
             <DefaultButton
               type="pill"
               appearance="primary"

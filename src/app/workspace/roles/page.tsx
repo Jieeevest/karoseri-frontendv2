@@ -18,7 +18,6 @@ const columns = [
   { label: "Role Name", tooltip: "", icon: "" },
   { label: "Description", tooltip: "", icon: "" },
   { label: "Status", tooltip: "", icon: "" },
-  { label: "Authorized Menu", tooltip: "", icon: "" },
   { label: "Added Date", tooltip: "", icon: "" },
   { label: "Last Updated", tooltip: "", icon: "" },
 ];
@@ -86,7 +85,6 @@ export default function RolesOverview() {
         ) : (
           <Badge appearance="danger" text="Inactive" type="outline" />
         ),
-      "Authorized Menu": role?.menu || "N/A",
       "Added Date": formatDate(role?.createdAt) || "N/A",
       "Last Updated": formatDate(role?.updatedAt) || "N/A",
     }));
@@ -135,12 +133,12 @@ export default function RolesOverview() {
             </p>
           </div>
           <div className="space-x-2">
-            <DefaultButton
+            {/* <DefaultButton
               type="pill"
               appearance="dark"
               text="Riwayat Perubahan"
               icon="ki-archive-tick"
-            />
+            /> */}
             <DefaultButton
               type="pill"
               appearance="primary"

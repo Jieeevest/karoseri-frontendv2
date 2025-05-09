@@ -69,10 +69,10 @@ export default function AddNewInventory() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Add New Inventory Item
+              Tambah Inventaris
             </h1>
             <p className="text-base text-gray-600 px-0.5 pb-3">
-              Add new inventory item details.
+              Formulir penambahan inventaris.
             </p>
           </div>
         </div>
@@ -81,9 +81,7 @@ export default function AddNewInventory() {
         <div className="flex max-w-full min-w-fit">
           <Card
             styleHeader={"justify-start"}
-            contentHeader={
-              <p className="font-semibold">Inventory Item Information</p>
-            }
+            contentHeader={<p className="font-semibold">Informasi Barang</p>}
             styleFooter={"justify-end"}
             contentFooter={
               <div className="flex justify-end gap-2">
@@ -92,11 +90,6 @@ export default function AddNewInventory() {
                   appearance="light"
                   text="Cancel"
                   onClick={() => router.back()}
-                />
-                <DefaultButton
-                  type="pill"
-                  appearance="warning"
-                  text="Save as Draft"
                 />
                 <DefaultButton
                   type="pill"
@@ -111,9 +104,9 @@ export default function AddNewInventory() {
               {/* Inventory Name */}
               <InputText
                 type="text"
-                label="Inventory Item Name"
+                label="Nama Barang"
                 required={true}
-                placeholder="Item Name"
+                placeholder="Nama Barang"
                 className="w-[600px]"
                 value={payload.name}
                 onChange={(e) => handleChange("name", e.target.value)}
@@ -122,9 +115,9 @@ export default function AddNewInventory() {
               {/* Amount */}
               <InputText
                 type="number"
-                label="Amount"
+                label="Jumlah Barang"
                 required={true}
-                placeholder="Amount"
+                placeholder="Jumlah Barang"
                 className="w-[600px]"
                 value={String(payload.amount)}
                 onChange={(e) => handleChange("amount", e.target.value)}
@@ -184,9 +177,9 @@ export default function AddNewInventory() {
               {/* Minimum Stock */}
               <InputText
                 type="number"
-                label="Minimum Stock"
+                label="Stok Minimum"
                 required={true}
-                placeholder="Minimum Stock"
+                placeholder="Stok Minimum"
                 className="w-[600px]"
                 value={String(payload.minimumStock)}
                 onChange={(e) => handleChange("minimumStock", e.target.value)}
@@ -195,7 +188,7 @@ export default function AddNewInventory() {
               {/* Description */}
               <InputText
                 type="text"
-                label="Description"
+                label="Deskripsi"
                 placeholder="Description"
                 className="w-[600px]"
                 value={payload.description}
