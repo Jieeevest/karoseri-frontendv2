@@ -84,14 +84,14 @@ export default function PositionOverview() {
       Deskripsi: item?.description || "N/A",
       Status:
         item?.status == "active" ? (
-          <Badge appearance="success" text="Active" type="outline" />
+          <Badge appearance="success" text="Aktif" type="outline" />
         ) : item?.status == "pending" ? (
           <Badge appearance="warning" text="Pending" type="outline" />
         ) : (
-          <Badge appearance="danger" text="Inactive" type="outline" />
+          <Badge appearance="danger" text="Tidak Aktif" type="outline" />
         ),
-      "Tanggal Ditambahkan": formatDate(item?.createdAt) || "N/A",
-      "Tanggal Terakhir Diubah": formatDate(item?.updatedAt) || "N/A",
+      "Tanggal Ditambahkan": formatDate(item?.createdAt, "id-ID") || "N/A",
+      "Tanggal Terakhir Diubah": formatDate(item?.updatedAt, "id-ID") || "N/A",
     }));
     setPositionList(mappedData);
   }, [positions]);
@@ -110,9 +110,6 @@ export default function PositionOverview() {
       });
       setOpenModal(false);
       setSuccessModal(true);
-      setTimeout(() => {
-        router.push("/workspace/positions");
-      }, 3000);
     } catch (error) {
       setOpenModal(false);
       setStatusMessage({
@@ -172,9 +169,9 @@ export default function PositionOverview() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
-          title="Confirmation"
-          message="Are you sure you want to delete this position?"
-          buttonText="Confirm"
+          title="Konfirmasi Hapus Jabatan"
+          message="Apakah Anda yakin ingin menghapus jabatan ini?"
+          buttonText="Ya, Hapus"
           buttonColor="btn-danger"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeDelete()}
@@ -185,7 +182,12 @@ export default function PositionOverview() {
           showModal={successModal}
           title={statusMessage?.type}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            setTimeout(() => {
+              router.push("/workspace/positions");
+            }, 3000);
+          }}
         />
       )}
     </Fragment>

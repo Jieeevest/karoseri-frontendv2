@@ -66,18 +66,19 @@ export default function AddNewPosition() {
     try {
       await createPosition(payload).unwrap();
       setStatusMessage({
-        message: "Penambahan posisi berhasil!",
+        message: "Penambahan jabatan berhasil!",
         type: "Success",
       });
+      setOpenModal(false);
       setSuccessModal(true);
-      router.push("/positions"); // Redirect to positions list
     } catch (error) {
+      setOpenModal(false);
       setStatusMessage({
-        message: "Gagal menambahkan posisi",
+        message: "Gagal menambahkan jabatan",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Gagal menambahkan posisi:", error);
+      console.error("Gagal menambahkan jabatan:", error);
     }
   };
 
@@ -119,13 +120,13 @@ export default function AddNewPosition() {
                 </div>
               }
             >
-              <div className="w-[800px] space-y-4 my-4">
+              <div className="w-[1300px] space-y-4 my-4">
                 <InputText
                   type="text"
                   label="Nama Jabatan"
                   required={true}
                   placeholder="Nama Jabatan"
-                  className="w-full"
+                  className="w-[800px]"
                   value={payload.name || ""}
                   onChange={(e) => handleChange("name", e.target.value)}
                   error={errors.name}
@@ -134,7 +135,7 @@ export default function AddNewPosition() {
                   label="Deskripsi"
                   required={true}
                   placeholder="Deskripsi jabatan"
-                  className="w-full"
+                  className="w-[800px]"
                   onChange={(e) => handleChange("description", e.target.value)}
                   value={payload.description}
                   error={errors.description}
@@ -147,6 +148,9 @@ export default function AddNewPosition() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
+          title="Konfirmasi Penambahan Jabatan"
+          message="Apakah Anda yakin ingin menambahkan jabatan ini?"
+          buttonText="Ya, Tambahkan"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeSubmit()}
         />
@@ -154,9 +158,12 @@ export default function AddNewPosition() {
       {successModal && (
         <SuccessModal
           showModal={successModal}
-          title={statusMessage?.type}
+          title={statusMessage?.type == "Success" ? "Sukses" : "Gagal"}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/positions");
+          }}
         />
       )}
     </Fragment>

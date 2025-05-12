@@ -59,7 +59,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 data-modal-dismiss="true"
                 onClick={handleClose}
               >
-                Cancel
+                Batal
               </button>
               <button className={`btn ${buttonColor}`} onClick={handleConfirm}>
                 {buttonText}

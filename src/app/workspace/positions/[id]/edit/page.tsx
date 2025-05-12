@@ -6,10 +6,14 @@ import {
   ConfirmationModal,
   TextArea,
 } from "@/components/atoms";
-import { useCreatePositionMutation } from "@/services/api";
+import {
+  useCreatePositionMutation,
+  useGetPositionByIdQuery,
+  useUpdatePositionMutation,
+} from "@/services/api";
 import DefaultButton from "@/components/atoms/Button";
-import { useRouter } from "next/navigation";
-import React, { Fragment, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import React, { Fragment, useEffect, useState } from "react";
 
 interface PayloadType {
   name?: string;
@@ -17,8 +21,10 @@ interface PayloadType {
   status?: string;
 }
 
-export default function AddNewPosition() {
+export default function UpdatePosition() {
   const router = useRouter();
+  const searchParams = useParams();
+  const id = String(searchParams.id);
   const [openModal, setOpenModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [statusMessage, setStatusMessage] = useState({
@@ -35,8 +41,18 @@ export default function AddNewPosition() {
     description: "",
   });
 
-  const [createPosition] = useCreatePositionMutation();
+  const { data: positionData } = useGetPositionByIdQuery(Number(id));
+  const [updatePosition] = useUpdatePositionMutation();
 
+  useEffect(() => {
+    if (positionData?.data) {
+      const currentData = positionData?.data;
+      setPayload({
+        name: currentData?.name ?? "",
+        description: currentData?.description ?? "",
+      });
+    }
+  }, [positionData]);
   const handleChange = (key: string, value: any) => {
     if (value) setErrors((prev) => ({ ...prev, [key]: "" }));
     setPayload({
@@ -64,20 +80,21 @@ export default function AddNewPosition() {
 
   const _executeSubmit = async () => {
     try {
-      await createPosition(payload).unwrap();
+      await updatePosition({ id: Number(id), updates: payload }).unwrap();
       setStatusMessage({
-        message: "Penambahan posisi berhasil!",
+        message: "Perubahan informasi posisi berhasil!",
         type: "Success",
       });
+      setOpenModal(false);
       setSuccessModal(true);
-      router.push("/positions"); // Redirect to positions list
     } catch (error) {
+      setOpenModal(false);
       setStatusMessage({
-        message: "Gagal menambahkan posisi",
+        message: "Gagal merubah informasi posisi",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Gagal menambahkan posisi:", error);
+      console.error("Gagal merubah informasi posisi:", error);
     }
   };
 
@@ -119,13 +136,13 @@ export default function AddNewPosition() {
                 </div>
               }
             >
-              <div className="w-[800px] space-y-4 my-4">
+              <div className="w-[1300px] space-y-4 my-4">
                 <InputText
                   type="text"
                   label="Nama Jabatan"
                   required={true}
                   placeholder="Nama Jabatan"
-                  className="w-full"
+                  className="w-[800px]"
                   value={payload.name || ""}
                   onChange={(e) => handleChange("name", e.target.value)}
                   error={errors.name}
@@ -134,7 +151,7 @@ export default function AddNewPosition() {
                   label="Deskripsi"
                   required={true}
                   placeholder="Deskripsi jabatan"
-                  className="w-full"
+                  className="w-[800px]"
                   onChange={(e) => handleChange("description", e.target.value)}
                   value={payload.description}
                   error={errors.description}
@@ -147,6 +164,9 @@ export default function AddNewPosition() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
+          title="Konfirmasi Ubah Informasi Jabatan"
+          message="Apakah Anda yakin ingin mengubah informasi jabatan?"
+          buttonText="Ya, Lanjutkan"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeSubmit()}
         />
@@ -154,9 +174,12 @@ export default function AddNewPosition() {
       {successModal && (
         <SuccessModal
           showModal={successModal}
-          title={statusMessage?.type}
+          title={statusMessage?.type == "Success" ? "Sukses" : "Gagal"}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/positions");
+          }}
         />
       )}
     </Fragment>
