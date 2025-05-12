@@ -485,12 +485,13 @@ export const api = createApi({
     /** Suppliers Endpoint */
     getSuppliers: builder.query<
       PaginatedResponse<SupplierData>,
-      { keyword: string; pageSize: number; page: number }
+      { keyword: string; status: string; pageSize: number; page: number }
     >({
-      query: ({ keyword, pageSize, page }) => {
+      query: ({ keyword, pageSize, page, status }) => {
         let queryString = "/suppliers?";
 
         if (keyword) queryString += `keyword=${keyword}&`;
+        if (status) queryString += `status=${status}&`;
         if (pageSize) queryString += `limit=${pageSize}`;
         if (page) queryString += `&page=${page}`;
 

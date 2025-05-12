@@ -5,8 +5,8 @@ import {
   SuccessModal,
   ConfirmationModal,
   TextArea,
+  Button,
 } from "@/components/atoms";
-import DefaultButton from "@/components/atoms/Button";
 import Loading from "@/components/molecules/Loading";
 import { useCreateSupplierMutation } from "@/services/api"; // Assuming you have this mutation created
 import { useRouter } from "next/navigation";
@@ -115,14 +115,20 @@ export default function AddNewSupplier() {
 
   const _executeSubmit = async () => {
     try {
-      await createSupplier(payload).unwrap();
+      const objectPayload = {
+        ...payload,
+        category: payload.category?.value,
+        bank: payload.bank?.value,
+      };
+      await createSupplier(objectPayload).unwrap();
       setStatusMessage({
         message: "Penambahan supplier berhasil!",
         type: "Success",
       });
+      setOpenModal(false);
       setSuccessModal(true);
-      router.push("/suppliers"); // Redirect to suppliers list
     } catch (error) {
+      setOpenModal(false);
       setStatusMessage({
         message: "Gagal menambahkan supplier",
         type: "Error",
@@ -157,13 +163,13 @@ export default function AddNewSupplier() {
               styleFooter={"justify-end"}
               contentFooter={
                 <div className="flex justify-end gap-2 ">
-                  <DefaultButton
+                  <Button
                     type="pill"
                     appearance="light"
                     text="Kembali"
                     onClick={() => router.back()}
                   />
-                  <DefaultButton
+                  <Button
                     type="pill"
                     appearance="primary"
                     text="Simpan"
@@ -295,6 +301,9 @@ export default function AddNewSupplier() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
+          title="Konfirmasi Penambahan Supplier"
+          message="Apakah anda yakin ingin menambahkan supplier ini?"
+          buttonText="Ya, Tambahkan"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeSubmit()}
         />
@@ -302,9 +311,12 @@ export default function AddNewSupplier() {
       {successModal && (
         <SuccessModal
           showModal={successModal}
-          title={statusMessage?.type}
+          title={statusMessage?.type == "Success" ? "Sukses" : "Gagal"}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/suppliers");
+          }}
         />
       )}
     </Fragment>

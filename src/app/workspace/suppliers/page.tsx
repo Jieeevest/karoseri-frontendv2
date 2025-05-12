@@ -80,12 +80,14 @@ export default function SuppliersOverview() {
         </div>
       ),
       "Nama Suplier": item?.name || "-",
-      Kategori: item?.category || "-",
+      Kategori: item?.category ? String(item?.category).toUpperCase() : "-",
       "No. Rekening":
-        `${item?.bankName} ${item?.bankNumber} - ${item?.bankOwner}` || "-",
+        `${String(item?.bank).toUpperCase()} ${item?.bankNumber} - ${
+          item?.bankOwner
+        }` || "-",
       Email: item?.email || "-",
       Telp: item?.phoneNumber || "-",
-      "Total Piutang": item?.debt || "-",
+      "Total Piutang": "Rp. " + (item?.debt ?? "0") + ",-",
     }));
     setSupplierList(mappedData);
   }, [suppliers]);
@@ -99,22 +101,19 @@ export default function SuppliersOverview() {
     try {
       await deleteSupplier(selectedId).unwrap();
       setStatusMessage({
-        message: "Supplier deleted successfully!",
+        message: "Hapus supplier berhasil!",
         type: "Success",
       });
       setOpenModal(false);
       setSuccessModal(true);
-      setTimeout(() => {
-        router.push("/workspace/suppliers");
-      }, 3000);
     } catch (error) {
       setOpenModal(false);
       setStatusMessage({
-        message: "Error deleting supplier",
+        message: "Gagal menghapus supplier",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Error deleting supplier:", error);
+      console.error("Gagal menghapus supplier:", error);
     }
   };
 
@@ -154,15 +153,16 @@ export default function SuppliersOverview() {
             filter={filter}
             setFilter={setFilter}
             className="w-full"
+            pageSizeOptions={[5, 10, 20, 30, 50, 100]}
           />
         </div>
       </div>
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
-          title="Confirmation"
-          message="Are you sure you want to delete this supplier?"
-          buttonText="Confirm"
+          title="Konfirmasi Hapus Suplier"
+          message="Apakah anda yakin ingin menghapus suplier?"
+          buttonText="Ya, Hapus"
           buttonColor="btn-danger"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeDelete()}
@@ -171,9 +171,12 @@ export default function SuppliersOverview() {
       {successModal && (
         <SuccessModal
           showModal={successModal}
-          title={statusMessage?.type}
+          title={statusMessage?.type == "Success" ? "Sukses" : "Gagal"}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/suppliers");
+          }}
         />
       )}
     </Fragment>
