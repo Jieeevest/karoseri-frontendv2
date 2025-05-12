@@ -1,170 +1,101 @@
 "use client";
-import { Card, InputCheckbox, InputText } from "@/components/atoms";
-import DefaultButton from "@/components/atoms/Button";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import React, { Fragment } from "react";
-
-const columns = [
-  { label: "Menu Name", tooltip: "", icon: "" },
-  { label: "View", tooltip: "", icon: "" },
-  { label: "Create", tooltip: "", icon: "" },
-  { label: "Delete", tooltip: "", icon: "" },
-  { label: "Update", tooltip: "", icon: "" },
-];
-
-const data = [
-  {
-    "Menu Name": (
-      <div className="flex items-center space-x-4">
-        <div>
-          <Image src="/siap-logo-new.png" alt="logo" width={20} height={20} />
-        </div>
-        <div className="text-left">
-          <p className="font-bold">Employee Management</p>
-          <p className="font-light">Sistem Administrasi Pegawai (SIAP)</p>
-        </div>
-      </div>
-    ),
-    View: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Create: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Delete: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Update: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-  },
-  {
-    "Menu Name": (
-      <div className="flex items-center space-x-4">
-        <div>
-          <Image src="/siap-logo-new.png" alt="logo" width={20} height={20} />
-        </div>
-        <div className="text-left">
-          <p className="font-bold">Leave Management Management</p>
-          <p className="font-light">Sistem Administrasi Pegawai (SIAP)</p>
-        </div>
-      </div>
-    ),
-    View: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Create: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Delete: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Update: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-  },
-  {
-    "Menu Name": (
-      <div className="flex items-center space-x-4">
-        <div>
-          <Image src="/siap-logo-new.png" alt="logo" width={20} height={20} />
-        </div>
-        <div className="text-left">
-          <p className="font-bold">Article Management</p>
-          <p className="font-light">Sistem Administrasi Pegawai (SIAP)</p>
-        </div>
-      </div>
-    ),
-    View: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Create: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Delete: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Update: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-  },
-  {
-    "Menu Name": (
-      <div className="flex items-center space-x-4">
-        <div className="scale-150">
-          <Image
-            src="/siap-payment-new.png"
-            alt="logo"
-            width={20}
-            height={20}
-          />
-        </div>
-        <div className="text-left">
-          <p className="font-bold">Reimbursement Management</p>
-          <p className="font-light">Payment Apps</p>
-        </div>
-      </div>
-    ),
-    View: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Create: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Delete: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-    Update: (
-      <div className="justify-center items-center text-center ml-8">
-        <InputCheckbox onChange={() => console.log()} />
-      </div>
-    ),
-  },
-];
+import React, { Fragment, useEffect, useState } from "react";
+import {
+  Card,
+  InputText,
+  Button,
+  TextArea,
+  ConfirmationModal,
+  SuccessModal,
+} from "@/components/atoms";
+import { useParams, useRouter } from "next/navigation";
+import { useGetRoleByIdQuery, useUpdateRoleMutation } from "@/services/api";
 
 export default function EditRole() {
   const router = useRouter();
+  const searchParams = useParams();
+  const id = String(searchParams.id);
+  const [openModal, setOpenModal] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
+  const [statusMessage, setStatusMessage] = useState({
+    message: "",
+    type: "",
+  });
+  const [payload, setPayload] = useState({
+    name: "",
+    description: "",
+  });
+  const [errors, setErrors] = useState({
+    name: "",
+    description: "",
+  });
+  const { data: roleData } = useGetRoleByIdQuery(Number(id));
+  const [updateRoles] = useUpdateRoleMutation();
+
+  useEffect(() => {
+    if (roleData?.data) {
+      const currentData = roleData?.data;
+      setPayload({
+        name: currentData?.name ?? "",
+        description: currentData?.description ?? "",
+      });
+    }
+  }, [roleData]);
+
+  const handleChange = (key: string, value: any) => {
+    if (value) setErrors((prev) => ({ ...prev, [key]: "" }));
+    setPayload({
+      ...payload,
+      [key]: value,
+    });
+  };
+
+  const validateForm = () => {
+    const newErrors = {
+      name: payload.name ? "" : "Nama Role Akses wajib diisi.",
+      description: payload.description ? "" : "Deskripsi wajib diisi.",
+    };
+
+    setErrors(newErrors);
+
+    return Object.values(newErrors).every((error) => !error);
+  };
+
+  const handleSubmit = async () => {
+    if (validateForm()) {
+      setOpenModal(true);
+    }
+  };
+
+  const _executeSubmit = async () => {
+    try {
+      await updateRoles({ id: Number(id), updates: payload }).unwrap();
+      setOpenModal(false);
+      setStatusMessage({
+        message: "Berhasil merubah informasi role akses!",
+        type: "Success",
+      });
+      setSuccessModal(true);
+    } catch (error) {
+      setOpenModal(false);
+      setStatusMessage({
+        message: "Gagal merubah informasi role akses",
+        type: "Error",
+      });
+      setSuccessModal(true);
+      console.error("Gagal merubah informasi role akses:", error);
+    }
+  };
   return (
     <Fragment>
       <div className="px-10 overflow-auto bg-transparent pt-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Edit Information Role
+              Ubah Informasi Role Akses
             </h1>
             <p className="text-base text-gray-600 px-0.5 pb-3">
-              Edit information role description.
+              Formulir perubahan informasi role akses.
             </p>
           </div>
         </div>
@@ -173,39 +104,72 @@ export default function EditRole() {
         <div className="flex max-w-full min-w-fit">
           <Card
             styleHeader={"justify-start"}
-            contentHeader={<p className="font-semibold">Role Information</p>}
+            contentHeader={
+              <p className="font-semibold">Informasi Role Akses</p>
+            }
             styleFooter={"justify-end"}
             contentFooter={
               <div className="flex justify-end gap-2 ">
-                <DefaultButton
+                <Button
                   type="pill"
                   appearance="light"
-                  text="Cancel"
+                  text="Kembali"
                   onClick={() => router.back()}
                 />
-                <DefaultButton type="pill" appearance="primary" text="Update" />
+                <Button
+                  type="pill"
+                  appearance="primary"
+                  text="Simpan"
+                  onClick={() => handleSubmit()}
+                />
               </div>
             }
           >
-            <div className="w-[1200px] space-y-4 my-4">
+            <div className="w-[1300px] space-y-4 my-4">
               <InputText
                 type="text"
-                label="Role Name"
+                label="Nama Role Akses"
                 required={true}
-                placeholder="Role Name"
-                className="w-[600px]"
+                placeholder="Masukkan nama role akses..."
+                className="w-[800px]"
+                value={payload.name}
+                onChange={(e) => handleChange("name", e.target.value)}
+                error={errors.name}
               />
-              <InputText
-                type="text"
-                label="Description"
+              <TextArea
+                label="Deskripsi"
                 required={true}
-                placeholder="Description"
-                className="w-[600px]"
+                placeholder="Masukkan deskripsi..."
+                className="w-[800px]"
+                onChange={(e) => handleChange("description", e.target.value)}
+                value={payload.description}
+                error={errors.description}
               />
             </div>
           </Card>
         </div>
       </div>
+      {openModal && (
+        <ConfirmationModal
+          showModal={openModal}
+          title="Konfirmasi Perubahan Role Akses"
+          message="Apakah Anda yakin ingin merubah informasi role akses ini?"
+          buttonText="Ya, Simpan"
+          handleClose={() => setOpenModal(false)}
+          handleConfirm={() => _executeSubmit()}
+        />
+      )}
+      {successModal && (
+        <SuccessModal
+          showModal={successModal}
+          title={statusMessage?.type == "Success" ? "Sukses" : "Gagal"}
+          message={statusMessage?.message}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/roles");
+          }}
+        />
+      )}
     </Fragment>
   );
 }

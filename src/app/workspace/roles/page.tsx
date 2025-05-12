@@ -15,11 +15,11 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
-  { label: "Role Name", tooltip: "", icon: "" },
-  { label: "Description", tooltip: "", icon: "" },
+  { label: "Nama Role", tooltip: "", icon: "" },
+  { label: "Deskripsi", tooltip: "", icon: "" },
   { label: "Status", tooltip: "", icon: "" },
-  { label: "Added Date", tooltip: "", icon: "" },
-  { label: "Last Updated", tooltip: "", icon: "" },
+  { label: "Tanggal Ditambahkan", tooltip: "", icon: "" },
+  { label: "Tanggal Terakhir Diubah", tooltip: "", icon: "" },
 ];
 
 export default function RolesOverview() {
@@ -75,18 +75,18 @@ export default function RolesOverview() {
           ></i>
         </div>
       ),
-      "Role Name": role?.name || "N/A",
-      Description: role?.description || "N/A",
+      "Nama Role": role?.name ?? "N/A",
+      Deskripsi: role?.description ?? "N/A",
       Status:
         role?.status == "active" ? (
-          <Badge appearance="success" text="Active" type="outline" />
+          <Badge appearance="success" text="Aktif" type="outline" />
         ) : role?.status == "pending" ? (
           <Badge appearance="warning" text="Pending" type="outline" />
         ) : (
-          <Badge appearance="danger" text="Inactive" type="outline" />
+          <Badge appearance="danger" text="Tidak Aktif" type="outline" />
         ),
-      "Added Date": formatDate(role?.createdAt) || "N/A",
-      "Last Updated": formatDate(role?.updatedAt) || "N/A",
+      "Tanggal Ditambahkan": formatDate(role?.createdAt, "id-ID") ?? "N/A",
+      "Tanggal Terakhir Diubah": formatDate(role?.updatedAt, "id-ID") ?? "N/A",
     }));
     setRoleList(mappedData);
   }, [roles]);
@@ -105,9 +105,6 @@ export default function RolesOverview() {
       });
       setOpenModal(false);
       setSuccessModal(true);
-      setTimeout(() => {
-        router.push("/workspace/packages");
-      }, 3000);
     } catch (error) {
       setOpenModal(false);
       setStatusMessage({
@@ -161,15 +158,16 @@ export default function RolesOverview() {
             filter={filter}
             setFilter={setFilter}
             className="w-full"
+            pageSizeOptions={[5, 10, 25, 50, 100]}
           />
         </div>
       </div>
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
-          title="Confirmation"
-          message="Are you sure you want to delete this package?"
-          buttonText="Confirm"
+          title="Konfirmasi Hapus Role Akses"
+          message="Apakah anda yakin ingin menghapus role akses ini?"
+          buttonText="Ya, Hapus"
           buttonColor="btn-danger"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeDelete()}
@@ -178,9 +176,14 @@ export default function RolesOverview() {
       {successModal && (
         <SuccessModal
           showModal={successModal}
-          title={statusMessage?.type}
+          title={statusMessage?.type == "success" ? "Sukses" : "Gagal"}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            setTimeout(() => {
+              router.push("/workspace/roles");
+            }, 3000);
+          }}
         />
       )}
     </Fragment>

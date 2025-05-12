@@ -1,4 +1,6 @@
 "use client";
+import { useRouter } from "next/navigation";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import {
   Badge,
   ConfirmationModal,
@@ -13,8 +15,6 @@ import {
   useDeleteEmployeeMutation,
   useGetEmployeesQuery,
 } from "@/services/api";
-import { useRouter } from "next/navigation";
-import React, { Fragment, useEffect, useMemo, useState } from "react";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
@@ -112,11 +112,11 @@ export default function EmployeesOverview() {
       Role: employee?.role?.name || "-",
       Status:
         employee?.status === "active" ? (
-          <Badge appearance="success" text="Active" type="outline" />
+          <Badge appearance="success" text="Aktif" type="outline" />
         ) : employee?.status === "pending" ? (
           <Badge appearance="warning" text="Pending" type="outline" />
         ) : (
-          <Badge appearance="danger" text="Inactive" type="outline" />
+          <Badge appearance="danger" text="Tidak Aktif" type="outline" />
         ),
     }));
 
@@ -137,7 +137,7 @@ export default function EmployeesOverview() {
           refetch();
           setLoading(false);
           setStatusMessage({
-            message: "Employee deleted successfully!",
+            message: "Gagal menghapus karyawan!",
             type: "Success",
           });
           setOpenModal(false);
@@ -148,11 +148,11 @@ export default function EmployeesOverview() {
       setLoading(false);
       setOpenModal(false);
       setStatusMessage({
-        message: "Error deleting employee",
+        message: "Gagal menghapus karyawan",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Error deleting employee:", error);
+      console.error("Gagal menghapus karyawan:", error);
     }
   };
 
@@ -202,15 +202,16 @@ export default function EmployeesOverview() {
             filter={filter}
             setFilter={setFilter}
             className="w-full"
+            pageSizeOptions={[5, 10, 25, 50, 100]}
           />
         </div>
       </div>
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
-          title="Confirmation"
-          message="Are you sure you want to delete this employee?"
-          buttonText="Confirm"
+          title="Konfirmasi Hapus Karyawan"
+          message="Apakah anda yakin ingin menghapus data karyawan ini?"
+          buttonText="Ya, Hapus"
           buttonColor="btn-danger"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeDelete()}
@@ -219,9 +220,12 @@ export default function EmployeesOverview() {
       {successModal && (
         <SuccessModal
           showModal={successModal}
-          title={statusMessage?.type}
+          title={statusMessage?.type == "Success" ? "Sukses" : "Gagal"}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/employees");
+          }}
         />
       )}
     </Fragment>

@@ -5,13 +5,12 @@ import {
   SuccessModal,
   ConfirmationModal,
   TextArea,
+  Button,
 } from "@/components/atoms";
 import {
-  useCreatePositionMutation,
   useGetPositionByIdQuery,
   useUpdatePositionMutation,
 } from "@/services/api";
-import DefaultButton from "@/components/atoms/Button";
 import { useParams, useRouter } from "next/navigation";
 import React, { Fragment, useEffect, useState } from "react";
 
@@ -121,13 +120,13 @@ export default function UpdatePosition() {
               styleFooter={"justify-end"}
               contentFooter={
                 <div className="flex justify-end gap-2 ">
-                  <DefaultButton
+                  <Button
                     type="pill"
                     appearance="light"
                     text="Kembali"
                     onClick={() => router.back()}
                   />
-                  <DefaultButton
+                  <Button
                     type="pill"
                     appearance="primary"
                     text="Simpan"

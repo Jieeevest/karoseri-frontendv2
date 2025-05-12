@@ -163,6 +163,7 @@ export default function PositionOverview() {
             filter={filter}
             setFilter={setFilter}
             className="w-full"
+            pageSizeOptions={[5, 10, 25, 50, 100]}
           />
         </div>
       </div>
