@@ -6,13 +6,10 @@ import {
   ConfirmationModal,
   TextArea,
 } from "@/components/atoms";
-import {
-  useCreateGroupMutation,
-  useCreatePositionMutation,
-} from "@/services/api";
+import { useGetGroupByIdQuery, useUpdateGroupMutation } from "@/services/api";
 import DefaultButton from "@/components/atoms/Button";
-import { useRouter } from "next/navigation";
-import React, { Fragment, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import React, { Fragment, useEffect, useState } from "react";
 
 interface PayloadType {
   name?: string;
@@ -22,6 +19,8 @@ interface PayloadType {
 
 export default function AddNewGroup() {
   const router = useRouter();
+  const searchParams = useParams();
+  const id = String(searchParams.id);
   const [openModal, setOpenModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [statusMessage, setStatusMessage] = useState({
@@ -38,7 +37,18 @@ export default function AddNewGroup() {
     description: "",
   });
 
-  const [createGroup] = useCreateGroupMutation();
+  const { data: groupData } = useGetGroupByIdQuery(Number(id));
+  const [updateGroup] = useUpdateGroupMutation();
+
+  useEffect(() => {
+    if (groupData?.data) {
+      const currentData = groupData?.data;
+      setPayload({
+        name: currentData?.name ?? "",
+        description: currentData?.description ?? "",
+      });
+    }
+  }, [groupData]);
 
   const handleChange = (key: string, value: any) => {
     if (value) setErrors((prev) => ({ ...prev, [key]: "" }));
@@ -50,7 +60,7 @@ export default function AddNewGroup() {
 
   const validateForm = () => {
     const newErrors = {
-      name: payload.name ? "" : "Nama Jabatan wajib diisi.",
+      name: payload.name ? "" : "Nama Grup wajib diisi.",
       description: payload.description ? "" : "Deskripsi wajib diisi.",
     };
 
@@ -67,14 +77,15 @@ export default function AddNewGroup() {
 
   const _executeSubmit = async () => {
     try {
-      await createGroup(payload).unwrap();
+      await updateGroup({ id: Number(id), updates: payload }).unwrap();
+      setOpenModal(false);
       setStatusMessage({
-        message: "Penambahan grup berhasil!",
+        message: "Perubahan informasi grup berhasil!",
         type: "Success",
       });
       setSuccessModal(true);
-      router.push("/groups");
     } catch (error) {
+      setOpenModal(false);
       setStatusMessage({
         message: "Gagal menambahkan grup",
         type: "Error",
@@ -90,9 +101,11 @@ export default function AddNewGroup() {
         <div className="px-10 bg-transparent pt-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Tambah Grup</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Ubah Informasi Grup
+              </h1>
               <p className="text-base text-gray-600 px-0.5 pb-3">
-                Formulir penambahan grup baru.
+                Formulir perubahan informasi grup.
               </p>
             </div>
           </div>
@@ -101,7 +114,7 @@ export default function AddNewGroup() {
           <div className="flex max-w-full min-w-fit">
             <Card
               styleHeader={"justify-start"}
-              contentHeader={<p className="font-semibold">Informasi Jabatan</p>}
+              contentHeader={<p className="font-semibold">Informasi Grup</p>}
               styleFooter={"justify-end"}
               contentFooter={
                 <div className="flex justify-end gap-2 ">
@@ -120,13 +133,13 @@ export default function AddNewGroup() {
                 </div>
               }
             >
-              <div className="w-[800px] space-y-4 my-4">
+              <div className="w-[1300px] space-y-4 my-4">
                 <InputText
                   type="text"
                   label="Nama Grup"
                   required={true}
                   placeholder="Nama Grup"
-                  className="w-full"
+                  className="w-[800px]"
                   value={payload.name || ""}
                   onChange={(e) => handleChange("name", e.target.value)}
                   error={errors.name}
@@ -135,7 +148,7 @@ export default function AddNewGroup() {
                   label="Deskripsi"
                   required={true}
                   placeholder="Deskripsi grup"
-                  className="w-full"
+                  className="w-[800px]"
                   onChange={(e) => handleChange("description", e.target.value)}
                   value={payload.description}
                   error={errors.description}
@@ -148,6 +161,9 @@ export default function AddNewGroup() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
+          title="Konfirmasi Perubahan"
+          message="Apakah Anda yakin ingin menyimpan perubahan ini?"
+          buttonText="Ya, Simpan"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeSubmit()}
         />
@@ -155,9 +171,12 @@ export default function AddNewGroup() {
       {successModal && (
         <SuccessModal
           showModal={successModal}
-          title={statusMessage?.type}
+          title={statusMessage?.type == "Success" ? "Sukses" : "Gagal"}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/groups");
+          }}
         />
       )}
     </Fragment>

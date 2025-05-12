@@ -79,14 +79,14 @@ export default function GroupOverview() {
       Deskripsi: item?.description || "N/A",
       Status:
         item?.status == "active" ? (
-          <Badge appearance="success" text="Active" type="outline" />
+          <Badge appearance="success" text="Aktif" type="outline" />
         ) : item?.status == "pending" ? (
           <Badge appearance="warning" text="Pending" type="outline" />
         ) : (
-          <Badge appearance="danger" text="Inactive" type="outline" />
+          <Badge appearance="danger" text="Tidak Aktif" type="outline" />
         ),
-      "Tanggal Ditambahkan": formatDate(item?.createdAt) || "N/A",
-      "Tanggal Terakhir Diubah": formatDate(item?.updatedAt) || "N/A",
+      "Tanggal Ditambahkan": formatDate(item?.createdAt, "id-ID") || "N/A",
+      "Tanggal Terakhir Diubah": formatDate(item?.updatedAt, "id-ID") || "N/A",
     }));
     setGroupList(mappedData);
   }, [groups]);
@@ -161,6 +161,7 @@ export default function GroupOverview() {
             filter={filter}
             setFilter={setFilter}
             className="w-full"
+            pageSizeOptions={[5, 10, 25, 50]}
           />
         </div>
       </div>

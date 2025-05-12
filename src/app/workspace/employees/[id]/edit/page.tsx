@@ -257,10 +257,10 @@ export default function EditRole() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">
-                Edit Informasi Karyawan
+                Ubah Informasi Karyawan
               </h1>
               <p className="text-base text-gray-600 px-0.5 pb-3">
-                Formulir penambahan karyawan.
+                Formulir perubahan informasi karyawan.
               </p>
             </div>
           </div>

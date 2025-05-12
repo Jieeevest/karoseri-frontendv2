@@ -127,9 +127,11 @@ export default function RolesOverview() {
       <div className="px-10 overflow-auto bg-transparent pt-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Roles Overview</h1>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Master Data Role Akses
+            </h1>
             <p className="text-base text-gray-600 px-0.5 pb-3">
-              Manage role access description.
+              Fitur untuk mengelola role akses.
             </p>
           </div>
           <div className="space-x-2">
@@ -142,7 +144,7 @@ export default function RolesOverview() {
             <DefaultButton
               type="pill"
               appearance="primary"
-              text="Add New Role"
+              text="Tambah Role Akses"
               icon="ki-plus-squared"
               className="cursor-pointer"
               onClick={() => router.push("/workspace/roles/add")}
@@ -153,7 +155,7 @@ export default function RolesOverview() {
       <div className="px-10 overflow-auto bg-transparent pt-4 sm:px-6 lg:px-8 mt-2">
         <div className="flex max-w-full">
           <DataTable
-            title="Role List"
+            title="Pustaka Role Akses"
             columns={columns}
             data={roleList}
             filter={filter}

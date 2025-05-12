@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 import InputText from "./InputText";
@@ -43,6 +43,10 @@ const DataTable: React.FC<DataTableProps> = ({
   setFilter,
   pageSizeOptions = [1, 2, 5, 10, 25, 50], // Default page size options
 }) => {
+  const [statusState, setStatusState] = useState({
+    label: "Aktif",
+    value: "active",
+  });
   return (
     <div className={`relative ${className} `}>
       <div className="grid">
@@ -52,7 +56,7 @@ const DataTable: React.FC<DataTableProps> = ({
             <div className="flex gap-2">
               <InputText
                 type="text"
-                placeholder="Search"
+                placeholder="Cari data"
                 onChange={(e) =>
                   setFilter && setFilter({ ...filter, keyword: e.target.value })
                 }
@@ -62,21 +66,22 @@ const DataTable: React.FC<DataTableProps> = ({
                 placeholder="Pilih status"
                 size="sm"
                 className="w-40"
-                onChange={(value) =>
-                  setFilter && setFilter({ ...filter, status: value.value })
-                }
+                onChange={(value) => {
+                  setFilter && setFilter({ ...filter, status: value.value });
+                  setStatusState(value);
+                }}
                 value={
-                  filter?.status
+                  statusState
                     ? {
-                        label: filter?.status?.label || "Active",
-                        value: filter?.status?.value || "active",
+                        label: statusState?.label || "Aktif",
+                        value: statusState?.value || "active",
                       }
                     : null
                 }
                 optionValue={[
-                  { label: "Active", value: "active" },
-                  { label: "Pending", value: "pending" },
-                  { label: "Inactive", value: "inactive" },
+                  { label: "Aktif", value: "active" },
+                  // { label: "Pending", value: "pending" },
+                  { label: "Tidak Aktif", value: "inactive" },
                 ]}
               />
               <DefaultButton

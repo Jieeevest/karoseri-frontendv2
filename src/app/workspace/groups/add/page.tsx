@@ -50,7 +50,7 @@ export default function AddNewGroup() {
 
   const validateForm = () => {
     const newErrors = {
-      name: payload.name ? "" : "Nama Jabatan wajib diisi.",
+      name: payload.name ? "" : "Nama Grup wajib diisi.",
       description: payload.description ? "" : "Deskripsi wajib diisi.",
     };
 
@@ -72,13 +72,14 @@ export default function AddNewGroup() {
         message: "Penambahan grup berhasil!",
         type: "Success",
       });
+      setOpenModal(false);
       setSuccessModal(true);
-      router.push("/groups");
     } catch (error) {
       setStatusMessage({
         message: "Gagal menambahkan grup",
         type: "Error",
       });
+      setOpenModal(false);
       setSuccessModal(true);
       console.error("Gagal menambahkan grup:", error);
     }
@@ -90,7 +91,9 @@ export default function AddNewGroup() {
         <div className="px-10 bg-transparent pt-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Tambah Grup</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Tambah Grup Baru
+              </h1>
               <p className="text-base text-gray-600 px-0.5 pb-3">
                 Formulir penambahan grup baru.
               </p>
@@ -101,7 +104,7 @@ export default function AddNewGroup() {
           <div className="flex max-w-full min-w-fit">
             <Card
               styleHeader={"justify-start"}
-              contentHeader={<p className="font-semibold">Informasi Jabatan</p>}
+              contentHeader={<p className="font-semibold">Informasi grup</p>}
               styleFooter={"justify-end"}
               contentFooter={
                 <div className="flex justify-end gap-2 ">
@@ -120,13 +123,13 @@ export default function AddNewGroup() {
                 </div>
               }
             >
-              <div className="w-[800px] space-y-4 my-4">
+              <div className="w-[1300px] space-y-4 my-4">
                 <InputText
                   type="text"
                   label="Nama Grup"
                   required={true}
                   placeholder="Nama Grup"
-                  className="w-full"
+                  className="w-[800px]"
                   value={payload.name || ""}
                   onChange={(e) => handleChange("name", e.target.value)}
                   error={errors.name}
@@ -135,7 +138,7 @@ export default function AddNewGroup() {
                   label="Deskripsi"
                   required={true}
                   placeholder="Deskripsi grup"
-                  className="w-full"
+                  className="w-[800px]"
                   onChange={(e) => handleChange("description", e.target.value)}
                   value={payload.description}
                   error={errors.description}
@@ -148,6 +151,9 @@ export default function AddNewGroup() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
+          title={"Konfirmasi Penambahan Grup"}
+          message={"Apakah anda yakin ingin menambahkan grup ini?"}
+          buttonText="Ya, tambahkan"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeSubmit()}
         />
@@ -155,9 +161,12 @@ export default function AddNewGroup() {
       {successModal && (
         <SuccessModal
           showModal={successModal}
-          title={statusMessage?.type}
+          title={statusMessage?.type == "Success" ? "Sukses" : "Gagal"}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/groups");
+          }}
         />
       )}
     </Fragment>
