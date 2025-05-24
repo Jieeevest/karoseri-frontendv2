@@ -18,6 +18,8 @@ interface PaginatedResponse<T> {
     locations: T[];
     vehicles: T[];
     activityLogs: T[];
+    inbounds: T[];
+    outbounds: T[];
   };
 }
 
@@ -73,7 +75,31 @@ export interface RequestData {
   id: number;
   incomingDate: string;
   supplier: string;
+  submitter: string;
+  approver: string;
   status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InboundData {
+  id: number;
+  incomingDate: string;
+  deliveryNumber: string;
+  supplier: string;
+  submitter: string;
+  receiver: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OutboundData {
+  id: number;
+  outcomingDate: string;
+  deliveryNumber: string;
+  supplier: string;
+  submitter: string;
+  approver: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -226,6 +252,32 @@ export interface ResponseRequestData {
   };
 }
 
+export interface ResponseInboundData {
+  data: {
+    id: number;
+    incomingDate: string;
+    deliveryNumber: string;
+    supplier: string;
+    submitter: string;
+    receiver: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponseOutboundData {
+  data: {
+    id: number;
+    outcomingDate: string;
+    deliveryNumber: string;
+    supplier: string;
+    submitter: string;
+    approver: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
 export interface ResponseSupplierData {
   data: {
     id: number;
@@ -285,6 +337,8 @@ export const api = createApi({
     "Locations",
     "Vehicles",
     "ActivityLogs",
+    "Inbounds",
+    "Outbounds",
   ],
   endpoints: (builder) => ({
     /** Roles Endpoint */
@@ -487,6 +541,102 @@ export const api = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["Requests"],
+    }),
+
+    getInbounds: builder.query<
+      PaginatedResponse<InboundData>,
+      { keyword: string; pageSize: number; page: number }
+    >({
+      query: ({ keyword, pageSize, page }) => {
+        let queryString = "/inbounds?";
+
+        if (keyword) queryString += `keyword=${keyword}&`;
+        if (pageSize) queryString += `limit=${pageSize}`;
+        if (page) queryString += `&page=${page}`;
+
+        return queryString;
+      },
+      providesTags: ["Inbounds"],
+    }),
+    getInboundById: builder.query<ResponseInboundData, number>({
+      query: (id) => `/inbounds/${id}`,
+      providesTags: ["Inbounds"],
+    }),
+    createInbound: builder.mutation<void, Partial<InboundData>>({
+      query: (newRequest) => ({
+        url: "/inbounds",
+        method: "POST",
+        body: JSON.stringify(newRequest),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Inbounds"],
+    }),
+    updateInbound: builder.mutation<
+      void,
+      { id: number; updates: Partial<InboundData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/inbounds/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Inbounds"],
+    }),
+    deleteInbound: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/inbounds/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Inbounds"],
+    }),
+
+    getOutbounds: builder.query<
+      PaginatedResponse<OutboundData>,
+      { keyword: string; pageSize: number; page: number }
+    >({
+      query: ({ keyword, pageSize, page }) => {
+        let queryString = "/outbounds?";
+
+        if (keyword) queryString += `keyword=${keyword}&`;
+        if (pageSize) queryString += `limit=${pageSize}`;
+        if (page) queryString += `&page=${page}`;
+
+        return queryString;
+      },
+      providesTags: ["Outbounds"],
+    }),
+    getOutboundById: builder.query<ResponseOutboundData, number>({
+      query: (id) => `/outbounds/${id}`,
+      providesTags: ["Outbounds"],
+    }),
+    createOutbound: builder.mutation<void, Partial<OutboundData>>({
+      query: (newRequest) => ({
+        url: "/outbounds",
+        method: "POST",
+        body: JSON.stringify(newRequest),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Outbounds"],
+    }),
+    updateOutbound: builder.mutation<
+      void,
+      { id: number; updates: Partial<OutboundData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/outbounds/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Outbounds"],
+    }),
+    deleteOutbound: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/outbounds/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Outbounds"],
     }),
 
     /** Suppliers Endpoint */
@@ -782,6 +932,18 @@ export const {
   useCreateRequestMutation,
   useUpdateRequestMutation,
   useDeleteRequestMutation,
+  //inbounds
+  useGetInboundsQuery,
+  useGetOutboundByIdQuery,
+  useCreateInboundMutation,
+  useUpdateInboundMutation,
+  useDeleteInboundMutation,
+  //outbounds
+  useGetOutboundsQuery,
+  useGetInboundByIdQuery,
+  useCreateOutboundMutation,
+  useUpdateOutboundMutation,
+  useDeleteOutboundMutation,
   //suppliers
   useGetSuppliersQuery,
   useGetSupplierByIdQuery,
