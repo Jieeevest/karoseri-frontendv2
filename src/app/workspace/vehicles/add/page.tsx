@@ -151,7 +151,7 @@ export default function AddNewVehicle() {
                 </div>
               }
             >
-              <div className="space-y-4 my-4">
+              <div className="w-[1300px] grid grid-cols-2 gap-x-6 gap-y-4 my-4">
                 <InputText
                   type="text"
                   label="Nama Showroom"
@@ -249,10 +249,12 @@ export default function AddNewVehicle() {
                 <InputText
                   type="text"
                   label="Deskripsi"
+                  required={true}
                   placeholder="Deskripsi Kendaraan"
                   className="w-full"
                   value={payload.description || ""}
                   onChange={(e) => handleChange("description", e.target.value)}
+                  error={errors.machineNumber}
                 />
               </div>
             </Card>

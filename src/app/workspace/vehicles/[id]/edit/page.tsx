@@ -6,9 +6,13 @@ import {
   ConfirmationModal,
 } from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
-import { useCreateVehicleMutation } from "@/services/api"; // Assuming you have this mutation created
-import { useRouter } from "next/navigation";
-import React, { Fragment, useState } from "react";
+import {
+  useCreateVehicleMutation,
+  useGetVehicleByIdQuery,
+  useUpdateVehicleMutation,
+} from "@/services/api"; // Assuming you have this mutation created
+import { useParams, useRouter } from "next/navigation";
+import React, { Fragment, useEffect, useState } from "react";
 
 interface PayloadType {
   showroomName?: string;
@@ -25,6 +29,8 @@ interface PayloadType {
 
 export default function AddNewVehicle() {
   const router = useRouter();
+  const searchParams = useParams();
+  const id = String(searchParams.id);
   const [openModal, setOpenModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [statusMessage, setStatusMessage] = useState({
@@ -54,9 +60,29 @@ export default function AddNewVehicle() {
     type: "",
     chasisNumber: "",
     machineNumber: "",
+    description: "",
   });
 
-  const [createVehicle] = useCreateVehicleMutation();
+  const { data: vehicleData } = useGetVehicleByIdQuery(Number(id));
+  const [updateVehicle] = useUpdateVehicleMutation();
+
+  useEffect(() => {
+    if (vehicleData?.data) {
+      const currentData = vehicleData?.data;
+      setPayload({
+        showroomName: currentData?.showroomName ?? "",
+        ownerName: currentData?.ownerName ?? "",
+        expeditionName: currentData?.expeditionName ?? "",
+        merk: currentData?.merk ?? "",
+        series: currentData?.series ?? "",
+        color: currentData?.color ?? "",
+        type: currentData?.type ?? "",
+        chasisNumber: currentData?.chasisNumber ?? "",
+        machineNumber: currentData?.machineNumber ?? "",
+        description: currentData?.description ?? "",
+      });
+    }
+  }, [vehicleData]);
 
   const handleChange = (key: string, value: any) => {
     if (value) setErrors((prev) => ({ ...prev, [key]: "" }));
@@ -79,6 +105,7 @@ export default function AddNewVehicle() {
       type: payload.type ? "" : "Tipe wajib diisi.",
       chasisNumber: payload.chasisNumber ? "" : "Nomor Rangka wajib diisi.",
       machineNumber: payload.machineNumber ? "" : "Nomor Mesin wajib diisi.",
+      description: payload.description ? "" : "Deskripsi wajib diisi.",
     };
 
     setErrors(newErrors);
@@ -94,20 +121,20 @@ export default function AddNewVehicle() {
 
   const _executeSubmit = async () => {
     try {
-      await createVehicle(payload).unwrap();
+      await updateVehicle({ id: Number(id), updates: payload }).unwrap();
       setStatusMessage({
-        message: "Penambahan kendaraan berhasil!",
+        message: "Perubahan kendaraan berhasil!",
         type: "Success",
       });
       setSuccessModal(true);
-      router.push("/vehicles"); // Redirect to vehicle list page
+      router.push("/workspace/vehicles"); // Redirect to vehicle list page
     } catch (error) {
       setStatusMessage({
-        message: "Gagal menambahkan kendaraan.",
+        message: "Gagal perubahan kendaraan.",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Gagal menambahkan kendaraan:", error);
+      console.error("Gagal perubahan kendaraan:", error);
     }
   };
 
@@ -118,10 +145,10 @@ export default function AddNewVehicle() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">
-                Tambah Kendaraan
+                Ubah Informasi Kendaraan
               </h1>
               <p className="text-base text-gray-600 px-0.5 pb-3">
-                Formulir penambahan kendaraan baru.
+                Formulir perubahan informasi kendaraan.
               </p>
             </div>
           </div>
@@ -151,7 +178,7 @@ export default function AddNewVehicle() {
                 </div>
               }
             >
-              <div className="space-y-4 my-4">
+              <div className="w-[1300px] grid grid-cols-2 gap-x-6 gap-y-4 my-4">
                 <InputText
                   type="text"
                   label="Nama Showroom"
@@ -249,10 +276,12 @@ export default function AddNewVehicle() {
                 <InputText
                   type="text"
                   label="Deskripsi"
+                  required={true}
                   placeholder="Deskripsi Kendaraan"
                   className="w-full"
                   value={payload.description || ""}
                   onChange={(e) => handleChange("description", e.target.value)}
+                  error={errors.machineNumber}
                 />
               </div>
             </Card>

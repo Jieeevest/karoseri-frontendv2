@@ -232,6 +232,13 @@ export interface ResponseSupplierData {
     name: string | null;
     phoneNumber: string | null;
     email: string | null;
+    bank: string | null;
+    bankNumber: string | null;
+    bankOwner: string | null;
+    phoneNumberAlt: string | null;
+    homeAddress: string | null;
+    totalDebt: number | null;
+    category: string;
     createdAt: string;
     updatedAt: string;
   };

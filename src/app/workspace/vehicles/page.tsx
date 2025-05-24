@@ -9,17 +9,27 @@ import DefaultButton from "@/components/atoms/Button";
 import Error404 from "@/components/molecules/Error404";
 import Loading from "@/components/molecules/Loading";
 import { formatDate } from "@/helpers";
-import { useDeleteGroupMutation, useGetGroupsQuery } from "@/services/api";
+import {
+  useDeleteGroupMutation,
+  useDeleteVehicleMutation,
+  useGetGroupsQuery,
+  useGetVehiclesQuery,
+} from "@/services/api";
 import { useRouter } from "next/navigation";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
-  { label: "Nama Group", tooltip: "", icon: "" },
+  { label: "Nama Showroom", tooltip: "", icon: "" },
+  { label: "Nama Pemilik", tooltip: "", icon: "" },
+  { label: "Nama Ekspedisi", tooltip: "", icon: "" },
+  { label: "Merk", tooltip: "", icon: "" },
+  { label: "Seri Kendaraan", tooltip: "", icon: "" },
+  { label: "Warna", tooltip: "", icon: "" },
+  { label: "Tipe Kendaraan", tooltip: "", icon: "" },
+  { label: "Nomor Chasis", tooltip: "", icon: "" },
+  { label: "Nomor Mesin", tooltip: "", icon: "" },
   { label: "Deskripsi", tooltip: "", icon: "" },
-  { label: "Status", tooltip: "", icon: "" },
-  { label: "Tanggal Ditambahkan", tooltip: "", icon: "" },
-  { label: "Tanggal Terakhir Diubah", tooltip: "", icon: "" },
 ];
 
 export default function GroupOverview() {
@@ -45,29 +55,29 @@ export default function GroupOverview() {
     page: number;
     totalData: number;
   });
-  const { data: groupData, error, isLoading } = useGetGroupsQuery(filter);
-  const [deleteGroup] = useDeleteGroupMutation();
+  const { data: vehicleData, error, isLoading } = useGetVehiclesQuery(filter);
+  const [deleteVehicle] = useDeleteVehicleMutation();
 
-  const groups = useMemo(
-    () => groupData?.data?.groups || [],
-    [groupData?.data?.groups]
+  const vehicles = useMemo(
+    () => vehicleData?.data?.vehicles || [],
+    [vehicleData?.data?.vehicles]
   );
 
   useEffect(() => {
-    if (groupData?.data) {
-      const currentData = groupData?.data;
+    if (vehicleData?.data) {
+      const currentData = vehicleData?.data;
       setFilter({ ...filter, totalData: currentData?.totalData || 0 });
     }
-  }, [groupData?.data]);
+  }, [vehicleData?.data]);
 
   useEffect(() => {
-    const mappedData: any = groups.map((item: any) => ({
+    const mappedData: any = vehicles.map((item: any) => ({
       "": (
         <div className="flex justify-center items-center gap-2 cursor-pointer">
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
             role="button"
-            onClick={() => router.push(`/workspace/groups/${item?.id}/edit`)}
+            onClick={() => router.push(`/workspace/vehicles/${item?.id}/edit`)}
           ></i>
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
@@ -75,21 +85,19 @@ export default function GroupOverview() {
           ></i>
         </div>
       ),
-      "Nama Grup": item?.name || "N/A",
+      "Nama Showroom": item?.showroomName || "N/A",
+      "Nama Pemilik": item?.ownerName || "N/A",
+      "Nama Ekspedisi": item?.expeditionName || "N/A",
+      Merk: item?.merk || "N/A",
+      "Seri Kendaraan": item?.series || "N/A",
+      Warna: item?.color || "N/A",
+      "Tipe Kendaraan": item?.type || "N/A",
+      "Nomor Chasis": item?.chasisNumber || "N/A",
+      "Nomor Mesin": item?.machineNumber || "N/A",
       Deskripsi: item?.description || "N/A",
-      Status:
-        item?.status == "active" ? (
-          <Badge appearance="success" text="Active" type="outline" />
-        ) : item?.status == "pending" ? (
-          <Badge appearance="warning" text="Pending" type="outline" />
-        ) : (
-          <Badge appearance="danger" text="Inactive" type="outline" />
-        ),
-      "Tanggal Ditambahkan": formatDate(item?.createdAt) || "N/A",
-      "Tanggal Terakhir Diubah": formatDate(item?.updatedAt) || "N/A",
     }));
     setGroupList(mappedData);
-  }, [groups]);
+  }, [vehicles]);
 
   const handleDelete = async (id: number) => {
     setOpenModal(true);
@@ -98,24 +106,21 @@ export default function GroupOverview() {
 
   const _executeDelete = async () => {
     try {
-      await deleteGroup(selectedId).unwrap();
+      await deleteVehicle(selectedId).unwrap();
       setStatusMessage({
-        message: "Group deleted successfully!",
+        message: "Hapus Kendaraan berhasil!",
         type: "Success",
       });
       setOpenModal(false);
       setSuccessModal(true);
-      setTimeout(() => {
-        router.push("/workspace/groups");
-      }, 3000);
     } catch (error) {
       setOpenModal(false);
       setStatusMessage({
-        message: "Error deleting group",
+        message: "Gagal menghapus kendaraan",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Error deleting group:", error);
+      console.error("Gagal menghapus kendaraan:", error);
     }
   };
 
@@ -128,10 +133,10 @@ export default function GroupOverview() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Master Data Grup
+              Master Data Kendaraan
             </h1>
             <p className="text-base text-gray-600 px-0.5 pb-3">
-              Fitur untuk mengelola grup.
+              Fitur untuk mengelola kendaraan.
             </p>
           </div>
           <div className="space-x-2">
@@ -144,10 +149,10 @@ export default function GroupOverview() {
             <DefaultButton
               type="pill"
               appearance="primary"
-              text="Tambah Grup"
+              text="Tambah Kendaraan"
               icon="ki-plus-squared"
               className="cursor-pointer"
-              onClick={() => router.push("/workspace/groups/add")}
+              onClick={() => router.push("/workspace/vehicles/add")}
             />
           </div>
         </div>
@@ -155,7 +160,7 @@ export default function GroupOverview() {
       <div className="px-10 overflow-auto bg-transparent pt-4 sm:px-6 lg:px-8 mt-2">
         <div className="flex max-w-full">
           <DataTable
-            title="Pustaka Grup"
+            title="Pustaka Kendaraan"
             columns={columns}
             data={groupList}
             filter={filter}

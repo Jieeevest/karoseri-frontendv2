@@ -1,17 +1,25 @@
 "use client";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   Card,
   InputText,
   SuccessModal,
   ConfirmationModal,
   TextArea,
-  Select,
+  Button,
 } from "@/components/atoms";
-import DefaultButton from "@/components/atoms/Button";
-import CustomSelect from "@/components/atoms/Select";
-import { useCreateSupplierMutation } from "@/services/api"; // Assuming you have this mutation created
-import { useRouter } from "next/navigation";
-import React, { Fragment, useState } from "react";
+import {
+  useGetSupplierByIdQuery,
+  useUpdateSupplierMutation,
+} from "@/services/api"; // Assuming you have this mutation created
+import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import Loading from "@/components/molecules/Loading";
+
+const CustomSelect = dynamic(() => import("@/components/atoms/Select"), {
+  ssr: false,
+  loading: () => <Loading />,
+});
 
 interface PayloadType {
   name?: string;
@@ -32,8 +40,23 @@ interface PayloadType {
   totalDebt?: number;
 }
 
+const categories = [
+  { label: "PPN", value: "ppn" },
+  { label: "Non PPN", value: "non-ppn" },
+];
+
+const banks = [
+  { label: "BCA", value: "bca" },
+  { label: "BRI", value: "bri" },
+  { label: "Mandiri", value: "mandiri" },
+  { label: "BNI", value: "bni" },
+  { label: "Other", value: "other" },
+];
+
 export default function AddNewSupplier() {
   const router = useRouter();
+  const searchParams = useParams();
+  const id = String(searchParams.id);
   const [openModal, setOpenModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [statusMessage, setStatusMessage] = useState({
@@ -64,8 +87,32 @@ export default function AddNewSupplier() {
     homeAddress: "",
   });
 
-  const [createSupplier] = useCreateSupplierMutation();
+  const { data: supplierData } = useGetSupplierByIdQuery(Number(id));
+  const [updateSuppliers] = useUpdateSupplierMutation();
 
+  useEffect(() => {
+    if (supplierData?.data) {
+      const currentData = supplierData?.data;
+      setPayload({
+        name: currentData?.name ?? "",
+        category: currentData?.category
+          ? categories?.find(
+              (category) => category.value === currentData?.category
+            )
+          : null,
+        bank: currentData?.bank
+          ? banks.find((bank) => bank.value === currentData?.bank)
+          : null,
+        bankNumber: currentData?.bankNumber ?? "",
+        bankOwner: currentData?.bankOwner ?? "",
+        phoneNumber: currentData?.phoneNumber ?? "",
+        phoneNumberAlt: currentData.phoneNumberAlt ?? "",
+        email: currentData?.email ?? "",
+        homeAddress: currentData?.homeAddress ?? "",
+        totalDebt: currentData?.totalDebt ?? 0,
+      });
+    }
+  }, [supplierData]);
   const handleChange = (key: string, value: any) => {
     if (value) setErrors((prev) => ({ ...prev, [key]: "" }));
     setPayload({
@@ -110,20 +157,21 @@ export default function AddNewSupplier() {
 
   const _executeSubmit = async () => {
     try {
-      await createSupplier(payload).unwrap();
+      await updateSuppliers({ id: Number(id), updates: payload }).unwrap();
       setStatusMessage({
-        message: "Penambahan supplier berhasil!",
+        message: "Perubahan informasi supplier berhasil!",
         type: "Success",
       });
+      setOpenModal(false);
       setSuccessModal(true);
-      router.push("/suppliers"); // Redirect to suppliers list
     } catch (error) {
+      setOpenModal(false);
       setStatusMessage({
-        message: "Gagal menambahkan supplier",
+        message: "Gagal merubah informasi supplier",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Gagal menambahkan supplier:", error);
+      console.error("Gagal merubah informasi supplier:", error);
     }
   };
 
@@ -152,13 +200,13 @@ export default function AddNewSupplier() {
               styleFooter={"justify-end"}
               contentFooter={
                 <div className="flex justify-end gap-2 ">
-                  <DefaultButton
+                  <Button
                     type="pill"
                     appearance="light"
                     text="Kembali"
                     onClick={() => router.back()}
                   />
-                  <DefaultButton
+                  <Button
                     type="pill"
                     appearance="primary"
                     text="Simpan"
@@ -194,10 +242,7 @@ export default function AddNewSupplier() {
                         : null
                     }
                     onChange={(value) => handleChange("category", value)}
-                    optionValue={[
-                      { label: "PPN", value: "ppn" },
-                      { label: "Non PPN", value: "non-ppn" },
-                    ]}
+                    optionValue={categories}
                     error={errors.category}
                   />
 
@@ -216,13 +261,7 @@ export default function AddNewSupplier() {
                         : null
                     }
                     onChange={(value) => handleChange("bank", value)}
-                    optionValue={[
-                      { label: "BCA", value: "bca" },
-                      { label: "BRI", value: "bri" },
-                      { label: "Mandiri", value: "mandiri" },
-                      { label: "BNI", value: "bni" },
-                      { label: "Other", value: "other" },
-                    ]}
+                    optionValue={banks}
                     error={errors.bank}
                   />
                   <InputText
@@ -289,6 +328,9 @@ export default function AddNewSupplier() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
+          title="Konfirmasi Perubahan Supplier"
+          message="Apakah anda yakin ingin menyimpan perubahan supplier ini?"
+          buttonText="Ya, Simpan"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeSubmit()}
         />
@@ -296,9 +338,12 @@ export default function AddNewSupplier() {
       {successModal && (
         <SuccessModal
           showModal={successModal}
-          title={statusMessage?.type}
+          title={statusMessage?.type == "Success" ? "Sukses" : "Gagal"}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/suppliers");
+          }}
         />
       )}
     </Fragment>
