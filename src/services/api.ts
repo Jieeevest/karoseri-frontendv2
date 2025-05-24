@@ -645,7 +645,7 @@ export const api = createApi({
       { keyword: string; status: string; pageSize: number; page: number }
     >({
       query: ({ keyword, status, pageSize, page }) => {
-        let queryString = "/saving-locations?";
+        let queryString = "/locations?";
 
         if (keyword) queryString += `keyword=${keyword}&`;
         if (status) queryString += `status=${status}&`;
@@ -662,7 +662,7 @@ export const api = createApi({
     }),
     createLocation: builder.mutation<void, Partial<LocationData>>({
       query: (newLocation) => ({
-        url: "/saving-locations",
+        url: "/locations",
         method: "POST",
         body: JSON.stringify(newLocation),
         headers: { "Content-Type": "application/json" },
@@ -674,7 +674,7 @@ export const api = createApi({
       { id: number; updates: Partial<GroupData> }
     >({
       query: ({ id, updates }) => ({
-        url: `/saving-locations/${id}`,
+        url: `/locations/${id}`,
         method: "PUT",
         body: JSON.stringify(updates),
         headers: { "Content-Type": "application/json" },
@@ -683,7 +683,7 @@ export const api = createApi({
     }),
     deleteLocation: builder.mutation<void, number>({
       query: (id) => ({
-        url: `/saving-locations/${id}`,
+        url: `/locations/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Locations"],

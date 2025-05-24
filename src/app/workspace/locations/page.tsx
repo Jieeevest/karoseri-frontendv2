@@ -94,7 +94,7 @@ export default function GroupOverview() {
     try {
       await deleteLocation(selectedId).unwrap();
       setStatusMessage({
-        message: "Location deleted successfully!",
+        message: "Hapus lokasi penyimpanan berhasil!",
         type: "Success",
       });
       setOpenModal(false);
@@ -105,11 +105,11 @@ export default function GroupOverview() {
     } catch (error) {
       setOpenModal(false);
       setStatusMessage({
-        message: "Error deleting location",
+        message: "Gagal menghapus lokasi penyimpanan",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Error deleting location:", error);
+      console.error("Gagal menghapus lokasi penyimpanan:", error);
     }
   };
 
@@ -129,12 +129,6 @@ export default function GroupOverview() {
             </p>
           </div>
           <div className="space-x-2">
-            <DefaultButton
-              type="pill"
-              appearance="dark"
-              text="Riwayat Perubahan"
-              icon="ki-archive-tick"
-            />
             <DefaultButton
               type="pill"
               appearance="primary"

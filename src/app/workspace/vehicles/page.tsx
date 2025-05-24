@@ -142,12 +142,6 @@ export default function GroupOverview() {
           <div className="space-x-2">
             <DefaultButton
               type="pill"
-              appearance="dark"
-              text="Riwayat Perubahan"
-              icon="ki-archive-tick"
-            />
-            <DefaultButton
-              type="pill"
               appearance="primary"
               text="Tambah Kendaraan"
               icon="ki-plus-squared"

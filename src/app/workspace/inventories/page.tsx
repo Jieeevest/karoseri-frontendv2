@@ -18,15 +18,15 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
-  { label: "Item Name", tooltip: "", icon: "" },
-  { label: "Amount", tooltip: "", icon: "" },
-  { label: "Type", tooltip: "", icon: "" },
-  { label: "Category", tooltip: "", icon: "" },
-  { label: "Location", tooltip: "", icon: "" },
-  { label: "Minimum Stock", tooltip: "", icon: "" },
-  { label: "Description", tooltip: "", icon: "" },
-  { label: "Added Date", tooltip: "", icon: "" },
-  { label: "Last Updated", tooltip: "", icon: "" },
+  { label: "Nama Barang", tooltip: "", icon: "" },
+  { label: "Jumlah", tooltip: "", icon: "" },
+  { label: "Tipe", tooltip: "", icon: "" },
+  { label: "Kategori", tooltip: "", icon: "" },
+  { label: "Lokasi", tooltip: "", icon: "" },
+  { label: "Stok Minimum", tooltip: "", icon: "" },
+  { label: "Deskripsi", tooltip: "", icon: "" },
+  { label: "Tanggal Ditambahkan", tooltip: "", icon: "" },
+  { label: "Tanggal Terakhir Diubah", tooltip: "", icon: "" },
 ];
 
 export default function InventoryOverview() {
@@ -89,15 +89,15 @@ export default function InventoryOverview() {
           ></i>
         </div>
       ),
-      "Item Name": item?.name || "N/A",
-      Amount: item?.amount || "N/A",
-      Type: item?.type?.name || "N/A",
-      Category: item?.category?.name || "N/A",
-      Location: item?.location?.name || "N/A",
-      "Minimum Stock": item?.minimumStock || "N/A",
-      Description: item?.description || "N/A",
-      "Added Date": formatDate(item?.createdAt) || "N/A",
-      "Last Updated": formatDate(item?.updatedAt) || "N/A",
+      "Nama Barang": item?.name || "N/A",
+      Jumlah: item?.amount || "N/A",
+      Tipe: item?.type?.name || "N/A",
+      Kategori: item?.category?.name || "N/A",
+      Lokasi: item?.location?.name || "N/A",
+      "Stok Minimum": item?.minimumStock || "N/A",
+      Deskripsi: item?.description || "N/A",
+      "Tanggal Ditambahkan": formatDate(item?.createdAt) || "N/A",
+      "Tanggal Terakhir Diubah": formatDate(item?.updatedAt) || "N/A",
     }));
     setInventoryList(mappedData);
   }, [inventory]);
@@ -111,7 +111,7 @@ export default function InventoryOverview() {
     try {
       await deleteInventory(selectedId).unwrap();
       setStatusMessage({
-        message: "Inventory item deleted successfully!",
+        message: "Berhasil menghapus item!",
         type: "Success",
       });
       setOpenModal(false);
@@ -122,11 +122,11 @@ export default function InventoryOverview() {
     } catch (error) {
       setOpenModal(false);
       setStatusMessage({
-        message: "Error deleting inventory item",
+        message: "Gagal menghapus item",
         type: "Error",
       });
       setSuccessModal(true);
-      console.error("Error deleting inventory item:", error);
+      console.error("Gagal menghapus item:", error);
     }
   };
 
@@ -148,14 +148,8 @@ export default function InventoryOverview() {
           <div className="space-x-2">
             <DefaultButton
               type="pill"
-              appearance="dark"
-              text="Riwayat Perubahan"
-              icon="ki-archive-tick"
-            />
-            <DefaultButton
-              type="pill"
               appearance="primary"
-              text="Add New Item"
+              text="Tambah Barang"
               icon="ki-plus-squared"
               className="cursor-pointer"
               onClick={() => router.push("/workspace/inventories/add")}
@@ -166,7 +160,7 @@ export default function InventoryOverview() {
       <div className="px-10 overflow-auto bg-transparent pt-4 sm:px-6 lg:px-8 mt-2">
         <div className="flex max-w-full">
           <DataTable
-            title="Inventory List"
+            title="Informasi Inventaris"
             columns={columns}
             data={inventoryList}
             filter={filter}
