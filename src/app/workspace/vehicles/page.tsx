@@ -1,22 +1,17 @@
 "use client";
-import {
-  Badge,
-  ConfirmationModal,
-  DataTable,
-  SuccessModal,
-} from "@/components/atoms";
+import { ConfirmationModal, DataTable, SuccessModal } from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
 import Error404 from "@/components/molecules/Error404";
 import Loading from "@/components/molecules/Loading";
-import { formatDate } from "@/helpers";
-import {
-  useDeleteGroupMutation,
-  useDeleteVehicleMutation,
-  useGetGroupsQuery,
-  useGetVehiclesQuery,
-} from "@/services/api";
+import { useDeleteVehicleMutation, useGetVehiclesQuery } from "@/services/api";
 import { useRouter } from "next/navigation";
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
@@ -32,9 +27,12 @@ const columns = [
   { label: "Deskripsi", tooltip: "", icon: "" },
 ];
 
+const CURRENT_CHECKPOINT_URL = `/workspace/vehicles`;
+
 export default function GroupOverview() {
   const router = useRouter();
   const [groupList, setGroupList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [selectedId, setSelectedId] = useState(1);
@@ -55,18 +53,32 @@ export default function GroupOverview() {
     page: number;
     totalData: number;
   });
-  const { data: vehicleData, error, isLoading } = useGetVehiclesQuery(filter);
+  const {
+    data: vehicleData,
+    error,
+    isLoading,
+    refetch,
+  } = useGetVehiclesQuery(filter);
   const [deleteVehicle] = useDeleteVehicleMutation();
 
   const vehicles = useMemo(
-    () => vehicleData?.data?.vehicles || [],
+    () => vehicleData?.data?.vehicles ?? [],
     [vehicleData?.data?.vehicles]
+  );
+
+  const redirectUrl = useCallback(
+    (additionalUrl: string) => {
+      setLoading(true);
+      router.prefetch(CURRENT_CHECKPOINT_URL + additionalUrl);
+      return router.push(CURRENT_CHECKPOINT_URL + additionalUrl);
+    },
+    [router]
   );
 
   useEffect(() => {
     if (vehicleData?.data) {
       const currentData = vehicleData?.data;
-      setFilter({ ...filter, totalData: currentData?.totalData || 0 });
+      setFilter({ ...filter, totalData: currentData?.totalData ?? 0 });
     }
   }, [vehicleData?.data]);
 
@@ -77,7 +89,7 @@ export default function GroupOverview() {
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
             role="button"
-            onClick={() => router.push(`/workspace/vehicles/${item?.id}/edit`)}
+            onClick={() => redirectUrl(`/${item?.id}/edit`)}
           ></i>
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
@@ -85,24 +97,24 @@ export default function GroupOverview() {
           ></i>
         </div>
       ),
-      "Nama Showroom": item?.showroomName || "N/A",
-      "Nama Pemilik": item?.ownerName || "N/A",
-      "Nama Ekspedisi": item?.expeditionName || "N/A",
-      Merk: item?.merk || "N/A",
-      "Seri Kendaraan": item?.series || "N/A",
-      Warna: item?.color || "N/A",
-      "Tipe Kendaraan": item?.type || "N/A",
-      "Nomor Chasis": item?.chasisNumber || "N/A",
-      "Nomor Mesin": item?.machineNumber || "N/A",
-      Deskripsi: item?.description || "N/A",
+      "Nama Showroom": item?.showroomName ?? "N/A",
+      "Nama Pemilik": item?.ownerName ?? "N/A",
+      "Nama Ekspedisi": item?.expeditionName ?? "N/A",
+      Merk: item?.merk ?? "N/A",
+      "Seri Kendaraan": item?.series ?? "N/A",
+      Warna: item?.color ?? "N/A",
+      "Tipe Kendaraan": item?.type ?? "N/A",
+      "Nomor Chasis": item?.chasisNumber ?? "N/A",
+      "Nomor Mesin": item?.machineNumber ?? "N/A",
+      Deskripsi: item?.description ?? "N/A",
     }));
     setGroupList(mappedData);
   }, [vehicles]);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = useCallback(async (id: number) => {
     setOpenModal(true);
     setSelectedId(id);
-  };
+  }, []);
 
   const _executeDelete = async () => {
     try {
@@ -124,7 +136,7 @@ export default function GroupOverview() {
     }
   };
 
-  if (isLoading) return <Loading />;
+  if (isLoading || loading) return <Loading />;
   if (error) return <Error404 />;
 
   return (
@@ -146,7 +158,7 @@ export default function GroupOverview() {
               text="Tambah Kendaraan"
               icon="ki-plus-squared"
               className="cursor-pointer"
-              onClick={() => router.push("/workspace/vehicles/add")}
+              onClick={() => redirectUrl("/add")}
             />
           </div>
         </div>
@@ -166,9 +178,9 @@ export default function GroupOverview() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
-          title="Confirmation"
-          message="Are you sure you want to delete this group?"
-          buttonText="Confirm"
+          title="Konfirmasi"
+          message="Apakah anda yakin ingin menghapus data kendaraan ini?"
+          buttonText="Ya, Hapus"
           buttonColor="btn-danger"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeDelete()}
@@ -179,7 +191,10 @@ export default function GroupOverview() {
           showModal={successModal}
           title={statusMessage?.type}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            refetch();
+          }}
         />
       )}
     </Fragment>

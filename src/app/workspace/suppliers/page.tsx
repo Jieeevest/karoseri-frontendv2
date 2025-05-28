@@ -1,20 +1,20 @@
 "use client";
-import {
-  Badge,
-  ConfirmationModal,
-  DataTable,
-  SuccessModal,
-} from "@/components/atoms";
+import { ConfirmationModal, DataTable, SuccessModal } from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
 import Error404 from "@/components/molecules/Error404";
 import Loading from "@/components/molecules/Loading";
-import { formatDate } from "@/helpers";
 import {
   useDeleteSupplierMutation,
   useGetSuppliersQuery,
 } from "@/services/api";
 import { useRouter } from "next/navigation";
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
@@ -26,9 +26,12 @@ const columns = [
   { label: "Total Piutang", tooltip: "", icon: "" },
 ];
 
+const CURRENT_CHECKPOINT_URL = `/workspace/suppliers`;
+
 export default function SuppliersOverview() {
   const router = useRouter();
   const [supplierList, setSupplierList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [selectedId, setSelectedId] = useState(1);
@@ -49,20 +52,34 @@ export default function SuppliersOverview() {
     page: number;
     totalData: number;
   });
-  const { data: supplierData, error, isLoading } = useGetSuppliersQuery(filter);
+  const {
+    data: supplierData,
+    error,
+    isLoading,
+    refetch,
+  } = useGetSuppliersQuery(filter);
   const [deleteSupplier] = useDeleteSupplierMutation();
 
   const suppliers = useMemo(
-    () => supplierData?.data?.suppliers || [],
+    () => supplierData?.data?.suppliers ?? [],
     [supplierData?.data?.suppliers]
   );
 
   useEffect(() => {
     if (supplierData?.data) {
       const currentData = supplierData?.data;
-      setFilter({ ...filter, totalData: currentData?.totalData || 0 });
+      setFilter({ ...filter, totalData: currentData?.totalData ?? 0 });
     }
   }, [supplierData?.data]);
+
+  const redirectUrl = useCallback(
+    (additionalUrl: string) => {
+      setLoading(true);
+      router.prefetch(CURRENT_CHECKPOINT_URL + additionalUrl);
+      return router.push(CURRENT_CHECKPOINT_URL + additionalUrl);
+    },
+    [router]
+  );
 
   useEffect(() => {
     const mappedData: any = suppliers.map((item: any) => ({
@@ -71,7 +88,7 @@ export default function SuppliersOverview() {
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
             role="button"
-            onClick={() => router.push(`/workspace/suppliers/${item?.id}/edit`)}
+            onClick={() => redirectUrl(`/${item?.id}/edit`)}
           ></i>
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
@@ -79,14 +96,14 @@ export default function SuppliersOverview() {
           ></i>
         </div>
       ),
-      "Nama Suplier": item?.name || "-",
-      Kategori: item?.category ? String(item?.category).toUpperCase() : "-",
+      "Nama Suplier": item?.name ?? "N/A",
+      Kategori: item?.category ? String(item?.category).toUpperCase() : "N/A",
       "No. Rekening":
         `${String(item?.bank).toUpperCase()} ${item?.bankNumber} - ${
           item?.bankOwner
-        }` || "-",
-      Email: item?.email || "-",
-      Telp: item?.phoneNumber || "-",
+        }` || "N/A",
+      Email: item?.email ?? "N/A",
+      Telp: item?.phoneNumber ?? "N/A",
       "Total Piutang": "Rp. " + (item?.debt ?? "0") + ",-",
     }));
     setSupplierList(mappedData);
@@ -139,7 +156,7 @@ export default function SuppliersOverview() {
               text="Tambah Suplier"
               icon="ki-plus-squared"
               className="cursor-pointer"
-              onClick={() => router.push("/workspace/suppliers/add")}
+              onClick={() => redirectUrl(`/add`)}
             />
           </div>
         </div>
@@ -160,7 +177,7 @@ export default function SuppliersOverview() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
-          title="Konfirmasi Hapus Suplier"
+          title="Konfirmasi"
           message="Apakah anda yakin ingin menghapus suplier?"
           buttonText="Ya, Hapus"
           buttonColor="btn-danger"
@@ -175,7 +192,7 @@ export default function SuppliersOverview() {
           message={statusMessage?.message}
           handleClose={() => {
             setSuccessModal(false);
-            router.push("/workspace/suppliers");
+            refetch();
           }}
         />
       )}
