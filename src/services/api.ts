@@ -20,6 +20,9 @@ interface PaginatedResponse<T> {
     activityLogs: T[];
     inbounds: T[];
     outbounds: T[];
+    categories: T[];
+    billOfMaterials: T[];
+    projects: T[];
   };
 }
 
@@ -151,6 +154,24 @@ export interface VehicleData {
   chasisNumber: string | null;
   machineNumber: string | null;
   description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CategoryData {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BillOfMaterialsData {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectData {
+  id: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -314,6 +335,30 @@ export interface ResponseVehicleData {
   };
 }
 
+export interface ResponseCategoryData {
+  data: {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponseBillOfMaterialsData {
+  data: {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ResponseProjectData {
+  data: {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
@@ -339,6 +384,9 @@ export const api = createApi({
     "ActivityLogs",
     "Inbounds",
     "Outbounds",
+    "Categories",
+    "BillOfMaterials",
+    "Projects",
   ],
   endpoints: (builder) => ({
     /** Roles Endpoint */
@@ -889,6 +937,156 @@ export const api = createApi({
       invalidatesTags: ["Vehicles"],
     }),
 
+    /** Category Endpoint */
+    getCategories: builder.query<
+      PaginatedResponse<CategoryData>,
+      { keyword: string; status: string; pageSize: number; page: number }
+    >({
+      query: ({ keyword, status, pageSize, page }) => {
+        let queryString = "/categories?";
+
+        if (keyword) queryString += `keyword=${keyword}&`;
+        if (status) queryString += `status=${status}&`;
+        if (pageSize) queryString += `limit=${pageSize}`;
+        if (page) queryString += `&page=${page}`;
+
+        return queryString;
+      },
+      providesTags: ["Categories"],
+    }),
+    getCategoryById: builder.query<ResponseCategoryData, number>({
+      query: (id) => `/categories/${id}`,
+      providesTags: ["Categories"],
+    }),
+    createCategory: builder.mutation<void, Partial<CategoryData>>({
+      query: (newCategory) => ({
+        url: "/categories",
+        method: "POST",
+        body: JSON.stringify(newCategory),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Categories"],
+    }),
+    updateCategory: builder.mutation<
+      void,
+      { id: number; updates: Partial<CategoryData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/categories/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Categories"],
+    }),
+    deleteCategory: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/categories/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Categories"],
+    }),
+
+    /** Bill Of Materials Endpoint */
+    getBillOfMaterials: builder.query<
+      PaginatedResponse<BillOfMaterialsData>,
+      { keyword: string; status: string; pageSize: number; page: number }
+    >({
+      query: ({ keyword, status, pageSize, page }) => {
+        let queryString = "/billofmaterials?";
+
+        if (keyword) queryString += `keyword=${keyword}&`;
+        if (status) queryString += `status=${status}&`;
+        if (pageSize) queryString += `limit=${pageSize}`;
+        if (page) queryString += `&page=${page}`;
+
+        return queryString;
+      },
+      providesTags: ["BillOfMaterials"],
+    }),
+    getBillOfMaterialById: builder.query<ResponseBillOfMaterialsData, number>({
+      query: (id) => `/billofmaterials/${id}`,
+      providesTags: ["BillOfMaterials"],
+    }),
+    createBillOfMaterial: builder.mutation<void, Partial<BillOfMaterialsData>>({
+      query: (newBillOfMaterials) => ({
+        url: "/billofmaterials",
+        method: "POST",
+        body: JSON.stringify(newBillOfMaterials),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["BillOfMaterials"],
+    }),
+    updateBillOfMaterial: builder.mutation<
+      void,
+      { id: number; updates: Partial<BillOfMaterialsData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/billofmaterials/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["BillOfMaterials"],
+    }),
+    deleteBillOfMaterial: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/billofmaterials/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["BillOfMaterials"],
+    }),
+
+    /** Projects Endpoint */
+    getProjects: builder.query<
+      PaginatedResponse<ProjectData>,
+      { keyword: string; status: string; pageSize: number; page: number }
+    >({
+      query: ({ keyword, status, pageSize, page }) => {
+        let queryString = "/projects?";
+
+        if (keyword) queryString += `keyword=${keyword}&`;
+        if (status) queryString += `status=${status}&`;
+        if (pageSize) queryString += `limit=${pageSize}`;
+        if (page) queryString += `&page=${page}`;
+
+        return queryString;
+      },
+      providesTags: ["Projects"],
+    }),
+    getProjectById: builder.query<ResponseProjectData, number>({
+      query: (id) => `/projects/${id}`,
+      providesTags: ["Projects"],
+    }),
+    createProject: builder.mutation<void, Partial<ProjectData>>({
+      query: (newProject) => ({
+        url: "/projects",
+        method: "POST",
+        body: JSON.stringify(newProject),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Projects"],
+    }),
+    updateProject: builder.mutation<
+      void,
+      { id: number; updates: Partial<ProjectData> }
+    >({
+      query: ({ id, updates }) => ({
+        url: `/projects/${id}`,
+        method: "PUT",
+        body: JSON.stringify(updates),
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["Projects"],
+    }),
+    deleteProject: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/projects/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Projects"],
+    }),
+
     /** Activity Logs Endpoint */
     getActivityLogs: builder.query<
       PaginatedResponse<ActivityLogData>,
@@ -974,6 +1172,25 @@ export const {
   useCreateVehicleMutation,
   useUpdateVehicleMutation,
   useDeleteVehicleMutation,
+  //categories
+  useGetCategoriesQuery,
+  useGetCategoryByIdQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+  //billofmaterials
+  useGetBillOfMaterialsQuery,
+  useGetBillOfMaterialByIdQuery,
+  useCreateBillOfMaterialMutation,
+  useUpdateBillOfMaterialMutation,
+  useDeleteBillOfMaterialMutation,
+  //projects
+  useGetProjectsQuery,
+  useGetProjectByIdQuery,
+  useCreateProjectMutation,
+  useUpdateProjectMutation,
+  useDeleteProjectMutation,
+
   //activity logs
   useGetActivityLogsQuery,
 } = api;
