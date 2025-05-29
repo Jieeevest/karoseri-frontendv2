@@ -53,7 +53,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
                 data-modal-dismiss="true"
                 onClick={handleClose}
               >
-                Close
+                Tutup
               </button>
             </div>
           </div>

@@ -6,10 +6,13 @@ import {
   ConfirmationModal,
   TextArea,
 } from "@/components/atoms";
-import { useCreateLocationMutation } from "@/services/api";
+import {
+  useGetLocationByIdQuery,
+  useUpdateLocationMutation,
+} from "@/services/api";
 import DefaultButton from "@/components/atoms/Button";
-import { useRouter } from "next/navigation";
-import React, { Fragment, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import React, { Fragment, useEffect, useState } from "react";
 
 interface PayloadType {
   name?: string;
@@ -17,8 +20,9 @@ interface PayloadType {
   status?: string;
 }
 
-export default function AddNewLocation() {
+export default function UpdateLocation() {
   const router = useRouter();
+  const { id } = useParams<{ id: string }>();
   const [openModal, setOpenModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [statusMessage, setStatusMessage] = useState({
@@ -35,7 +39,18 @@ export default function AddNewLocation() {
     description: "",
   });
 
-  const [createLocation] = useCreateLocationMutation();
+  const { data: locationData } = useGetLocationByIdQuery(Number(id));
+  const [updateLocation] = useUpdateLocationMutation();
+
+  useEffect(() => {
+    if (locationData?.data) {
+      const currentData = locationData?.data;
+      setPayload({
+        name: currentData?.name ?? "",
+        description: currentData?.description ?? "",
+      });
+    }
+  }, [locationData]);
 
   const handleChange = (key: string, value: any) => {
     if (value) setErrors((prev) => ({ ...prev, [key]: "" }));
@@ -64,18 +79,19 @@ export default function AddNewLocation() {
 
   const _executeSubmit = async () => {
     try {
-      await createLocation(payload).unwrap();
+      await updateLocation({ id: Number(id), updates: payload }).unwrap();
       setStatusMessage({
-        message: "Penambahan lokasi penyimpanan berhasil!",
+        message: "Perubahan lokasi penyimpanan berhasil",
         type: "Success",
       });
+      setOpenModal(false);
       setSuccessModal(true);
-      router.push("/groups");
     } catch (error) {
       setStatusMessage({
-        message: "Gagal menambahkan lokasi penyimpanan",
+        message: "Gagal merubah lokasi penyimpanan",
         type: "Error",
       });
+      setOpenModal(false);
       setSuccessModal(true);
       console.error("Gagal menambahkan lokasi penyimpanan:", error);
     }
@@ -88,10 +104,10 @@ export default function AddNewLocation() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">
-                Tambah Lokasi Penyimpanan
+                Ubah Informasi Lokasi Penyimpanan
               </h1>
               <p className="text-base text-gray-600 px-0.5 pb-3">
-                Formulir penambahan lokasi penyimpanan baru.
+                Formulir perubahan lokasi penyimpanan baru.
               </p>
             </div>
           </div>
@@ -121,7 +137,7 @@ export default function AddNewLocation() {
                 </div>
               }
             >
-              <div className="w-[800px] space-y-4 my-4">
+              <div className="w-[1300px] space-y-4 my-4">
                 <InputText
                   type="text"
                   label="Nama Lokasi Penyimpanan"
@@ -149,6 +165,11 @@ export default function AddNewLocation() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
+          title={"Konfirmasi"}
+          message={
+            "Apakah anda yakin ingin melakukan perubahan pada lokasi penyimpanan ini?"
+          }
+          buttonText="Ya, Ubah"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeSubmit()}
         />
@@ -158,7 +179,10 @@ export default function AddNewLocation() {
           showModal={successModal}
           title={statusMessage?.type}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/locations");
+          }}
         />
       )}
     </Fragment>

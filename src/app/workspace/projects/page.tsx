@@ -7,7 +7,9 @@ import Error404 from "@/components/molecules/Error404";
 import Loading from "@/components/molecules/Loading";
 import {
   useDeleteCategoryMutation,
+  useDeleteProjectMutation,
   useGetCategoriesQuery,
+  useGetProjectsQuery,
 } from "@/services/api";
 
 const columns = [
@@ -43,24 +45,20 @@ export default function BillOfMaterialsView() {
     totalData: number;
   });
 
-  const {
-    data: categoryData,
-    isLoading,
-    error,
-  } = useGetCategoriesQuery(filter);
-  const [deleteCategory] = useDeleteCategoryMutation();
+  const { data: projectData, isLoading, error } = useGetProjectsQuery(filter);
+  const [deleteProject] = useDeleteProjectMutation();
 
   const items = useMemo(
-    () => categoryData?.data?.categories || [],
-    [categoryData?.data?.categories]
+    () => projectData?.data?.projects || [],
+    [projectData?.data?.projects]
   );
 
   useEffect(() => {
-    if (categoryData?.data) {
-      const currentData = categoryData?.data;
+    if (projectData?.data) {
+      const currentData = projectData?.data;
       setFilter({ ...filter, totalData: currentData?.totalData || 0 });
     }
-  }, [categoryData?.data]);
+  }, [projectData?.data]);
 
   useEffect(() => {
     const mappedData: any = items?.map((item: any) => ({
@@ -68,9 +66,7 @@ export default function BillOfMaterialsView() {
         <div className="flex justify-center items-center gap-2 cursor-pointer">
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300"
-            onClick={() =>
-              router.push(`/workspace/categories/${item?.id}/edit`)
-            }
+            onClick={() => router.push(`/workspace/projects/${item?.id}/edit`)}
           />
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300"
@@ -97,18 +93,18 @@ export default function BillOfMaterialsView() {
 
   const _executeDelete = async () => {
     try {
-      await deleteCategory(selectedId).unwrap();
+      await deleteProject(selectedId).unwrap();
       setOpenModal(false);
       setSuccessModal(true);
       setStatusMessage({
-        message: "Berhasil Menghapus Kategori!",
+        message: "Berhasil Menghapus Project!",
         type: "Success",
       });
     } catch (err) {
       setOpenModal(false);
       setSuccessModal(true);
       setStatusMessage({
-        message: "Gagal Menghapus Kategori!",
+        message: "Gagal Menghapus Project!",
         type: "Error",
       });
     }
@@ -123,22 +119,22 @@ export default function BillOfMaterialsView() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Master Data Kategori
+              Master Data Project
             </h1>
             <p className="text-base text-gray-600 pb-3">
-              Mengelola daftar kategori.
+              Mengelola daftar project.
             </p>
           </div>
           <DefaultButton
             type="pill"
             appearance="primary"
-            text="Tambah Kategori"
+            text="Tambah Project"
             icon="ki-plus-squared"
-            onClick={() => router.push("/workspace/categories/add")}
+            onClick={() => router.push("/workspace/projects/add")}
           />
         </div>
         <DataTable
-          title="Informasi Kategori"
+          title="Informasi Project"
           columns={columns}
           data={list}
           filter={filter}
@@ -151,7 +147,7 @@ export default function BillOfMaterialsView() {
         <ConfirmationModal
           showModal={openModal}
           title="Konfirmasi"
-          message="Yakin ingin menghapus kategori ini?"
+          message="Yakin ingin menghapus project ini?"
           buttonText="Ya, Hapus"
           buttonColor="btn-danger"
           handleClose={() => setOpenModal(false)}

@@ -94,7 +94,7 @@ export default function GroupOverview() {
     try {
       await deleteLocation(selectedId).unwrap();
       setStatusMessage({
-        message: "Hapus lokasi penyimpanan berhasil!",
+        message: "Berhasil menghapus data lokasi",
         type: "Success",
       });
       setOpenModal(false);
@@ -155,9 +155,9 @@ export default function GroupOverview() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
-          title="Confirmation"
-          message="Are you sure you want to delete this location?"
-          buttonText="Confirm"
+          title="Konfirmasi"
+          message="Apakah Anda yakin mau menghapus data ini?"
+          buttonText="Ya, Hapus"
           buttonColor="btn-danger"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeDelete()}

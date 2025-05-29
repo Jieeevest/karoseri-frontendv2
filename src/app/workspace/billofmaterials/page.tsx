@@ -1,16 +1,14 @@
 "use client";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { ConfirmationModal, DataTable, SuccessModal } from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
 import Error404 from "@/components/molecules/Error404";
 import Loading from "@/components/molecules/Loading";
 import {
-  useDeleteInboundMutation,
-  useDeleteRequestMutation,
-  useGetInboundsQuery,
-  useGetRequestsQuery,
+  useDeleteBillOfMaterialMutation,
+  useGetBillOfMaterialsQuery,
 } from "@/services/api";
 import { useRouter } from "next/navigation";
-import React, { Fragment, useEffect, useMemo, useState } from "react";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
@@ -23,7 +21,7 @@ const columns = [
   { label: "Tanggal Diubah", tooltip: "", icon: "" },
 ];
 
-export default function InboundsOverview() {
+export default function BillOfMaterialsView() {
   const router = useRouter();
   const [list, setList] = useState([]);
   const [openModal, setOpenModal] = useState(false);
@@ -45,20 +43,24 @@ export default function InboundsOverview() {
     totalData: number;
   });
 
-  const { data: inboundData, isLoading, error } = useGetInboundsQuery(filter);
-  const [deleteInbound] = useDeleteInboundMutation();
+  const {
+    data: billOfMaterialsData,
+    isLoading,
+    error,
+  } = useGetBillOfMaterialsQuery(filter);
+  const [deleteBillOfMaterials] = useDeleteBillOfMaterialMutation();
 
   const items = useMemo(
-    () => inboundData?.data?.inbounds || [],
-    [inboundData?.data?.requests]
+    () => billOfMaterialsData?.data?.billOfMaterials || [],
+    [billOfMaterialsData?.data?.billOfMaterials]
   );
 
   useEffect(() => {
-    if (inboundData?.data) {
-      const currentData = inboundData?.data;
+    if (billOfMaterialsData?.data) {
+      const currentData = billOfMaterialsData?.data;
       setFilter({ ...filter, totalData: currentData?.totalData || 0 });
     }
-  }, [inboundData?.data]);
+  }, [billOfMaterialsData?.data]);
 
   useEffect(() => {
     const mappedData: any = items?.map((item: any) => ({
@@ -66,7 +68,9 @@ export default function InboundsOverview() {
         <div className="flex justify-center items-center gap-2 cursor-pointer">
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300"
-            onClick={() => router.push(`/workspace/inbounds/${item?.id}/edit`)}
+            onClick={() =>
+              router.push(`/workspace/billofmaterials/${item?.id}/edit`)
+            }
           />
           <i
             className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300"
@@ -93,17 +97,20 @@ export default function InboundsOverview() {
 
   const _executeDelete = async () => {
     try {
-      await deleteInbound(selectedId).unwrap();
+      await deleteBillOfMaterials(selectedId).unwrap();
       setOpenModal(false);
       setSuccessModal(true);
       setStatusMessage({
-        message: "Berhasil menghapus item!",
+        message: "Berhasil Menghapus Bill of Materials !",
         type: "Success",
       });
     } catch (err) {
       setOpenModal(false);
       setSuccessModal(true);
-      setStatusMessage({ message: "Gagal menghapus item!", type: "Error" });
+      setStatusMessage({
+        message: "Gagal Menghapus Bill of Materials!",
+        type: "Error",
+      });
     }
   };
 
@@ -116,22 +123,22 @@ export default function InboundsOverview() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Manajemen Barang Masuk
+              Manajemen Bill of Materials
             </h1>
             <p className="text-base text-gray-600 pb-3">
-              Mengelola daftar barang masuk.
+              Mengelola daftar bill of materials.
             </p>
           </div>
           <DefaultButton
             type="pill"
             appearance="primary"
-            text="Tambah Barang Masuk"
+            text="Tambah Material"
             icon="ki-plus-squared"
-            onClick={() => router.push("/workspace/inbounds/add")}
+            onClick={() => router.push("/workspace/billofmaterials/add")}
           />
         </div>
         <DataTable
-          title="Informasi Barang Masuk"
+          title="Informasi Bill of Materials"
           columns={columns}
           data={list}
           filter={filter}
@@ -144,8 +151,8 @@ export default function InboundsOverview() {
         <ConfirmationModal
           showModal={openModal}
           title="Konfirmasi"
-          message="Yakin ingin menghapus item ini?"
-          buttonText="Hapus"
+          message="Yakin ingin menghapus material ini?"
+          buttonText="Ya, Hapus"
           buttonColor="btn-danger"
           handleClose={() => setOpenModal(false)}
           handleConfirm={_executeDelete}

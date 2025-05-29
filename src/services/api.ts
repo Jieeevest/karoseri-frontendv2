@@ -855,7 +855,7 @@ export const api = createApi({
       providesTags: ["Locations"],
     }),
     getLocationById: builder.query<ResponseLocationData, number>({
-      query: (id) => `/groups/${id}`,
+      query: (id) => `/locations/${id}`,
       providesTags: ["Locations"],
     }),
     createLocation: builder.mutation<void, Partial<LocationData>>({
@@ -943,7 +943,7 @@ export const api = createApi({
       { keyword: string; status: string; pageSize: number; page: number }
     >({
       query: ({ keyword, status, pageSize, page }) => {
-        let queryString = "/categories?";
+        let queryString = "/karoseri-categories?";
 
         if (keyword) queryString += `keyword=${keyword}&`;
         if (status) queryString += `status=${status}&`;
@@ -955,12 +955,12 @@ export const api = createApi({
       providesTags: ["Categories"],
     }),
     getCategoryById: builder.query<ResponseCategoryData, number>({
-      query: (id) => `/categories/${id}`,
+      query: (id) => `/karoseri-categories/${id}`,
       providesTags: ["Categories"],
     }),
     createCategory: builder.mutation<void, Partial<CategoryData>>({
       query: (newCategory) => ({
-        url: "/categories",
+        url: "/karoseri-categories",
         method: "POST",
         body: JSON.stringify(newCategory),
         headers: { "Content-Type": "application/json" },
@@ -972,7 +972,7 @@ export const api = createApi({
       { id: number; updates: Partial<CategoryData> }
     >({
       query: ({ id, updates }) => ({
-        url: `/categories/${id}`,
+        url: `/karoseri-categories/${id}`,
         method: "PUT",
         body: JSON.stringify(updates),
         headers: { "Content-Type": "application/json" },
@@ -981,7 +981,7 @@ export const api = createApi({
     }),
     deleteCategory: builder.mutation<void, number>({
       query: (id) => ({
-        url: `/categories/${id}`,
+        url: `/karoseri-categories/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Categories"],

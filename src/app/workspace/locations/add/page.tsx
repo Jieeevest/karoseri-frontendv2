@@ -66,16 +66,17 @@ export default function AddNewLocation() {
     try {
       await createLocation(payload).unwrap();
       setStatusMessage({
-        message: "Penambahan lokasi penyimpanan berhasil!",
+        message: "Berhasil menambahkan lokasi penyimpanan baru",
         type: "Success",
       });
+      setOpenModal(false);
       setSuccessModal(true);
-      router.push("/groups");
     } catch (error) {
       setStatusMessage({
-        message: "Gagal menambahkan lokasi penyimpanan",
+        message: "Gagal menambahkan lokasi penyimpanan baru",
         type: "Error",
       });
+      setOpenModal(false);
       setSuccessModal(true);
       console.error("Gagal menambahkan lokasi penyimpanan:", error);
     }
@@ -121,7 +122,7 @@ export default function AddNewLocation() {
                 </div>
               }
             >
-              <div className="w-[800px] space-y-4 my-4">
+              <div className="w-[1300px] space-y-4 my-4">
                 <InputText
                   type="text"
                   label="Nama Lokasi Penyimpanan"
@@ -149,6 +150,11 @@ export default function AddNewLocation() {
       {openModal && (
         <ConfirmationModal
           showModal={openModal}
+          title={"Konfirmasi"}
+          message={
+            "Apakah anda yakin ingin menambahkan lokasi penyimpanan ini?"
+          }
+          buttonText="Ya, Tambahkan"
           handleClose={() => setOpenModal(false)}
           handleConfirm={() => _executeSubmit()}
         />
@@ -156,9 +162,12 @@ export default function AddNewLocation() {
       {successModal && (
         <SuccessModal
           showModal={successModal}
-          title={statusMessage?.type}
+          title={statusMessage?.type === "Success" ? "Sukses" : "Gagal"}
           message={statusMessage?.message}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => {
+            setSuccessModal(false);
+            router.push("/workspace/locations");
+          }}
         />
       )}
     </Fragment>
