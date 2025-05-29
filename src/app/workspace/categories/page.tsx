@@ -1,7 +1,12 @@
 "use client";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ConfirmationModal, DataTable, SuccessModal } from "@/components/atoms";
+import {
+  Badge,
+  ConfirmationModal,
+  DataTable,
+  SuccessModal,
+} from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
 import Error404 from "@/components/molecules/Error404";
 import Loading from "@/components/molecules/Loading";
@@ -9,16 +14,14 @@ import {
   useDeleteCategoryMutation,
   useGetCategoriesQuery,
 } from "@/services/api";
+import { formatDate } from "@/helpers";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
-  { label: "Tanggal Kedatangan", tooltip: "", icon: "" },
-  { label: "Nomor Pengiriman", tooltip: "", icon: "" },
-  { label: "Nama Supplier", tooltip: "", icon: "" },
-  { label: "Pengirim", tooltip: "", icon: "" },
-  { label: "Penerima", tooltip: "", icon: "" },
+  { label: "Nama Kategori", tooltip: "", icon: "" },
+  { label: "Deskripsi", tooltip: "", icon: "" },
   { label: "Tanggal Ditambahkan", tooltip: "", icon: "" },
-  { label: "Tanggal Diubah", tooltip: "", icon: "" },
+  { label: "Tanggal Terakhir Diubah", tooltip: "", icon: "" },
 ];
 
 export default function BillOfMaterialsView() {
@@ -63,30 +66,27 @@ export default function BillOfMaterialsView() {
   }, [categoryData?.data]);
 
   useEffect(() => {
-    const mappedData: any = items?.map((item: any) => ({
+    const mappedData: any = items.map((item: any) => ({
       "": (
         <div className="flex justify-center items-center gap-2 cursor-pointer">
           <i
-            className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300"
+            className="text-2xl bg-slate-100 rounded-md ki-outline ki-notepad-edit hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
+            role="button"
             onClick={() =>
               router.push(`/workspace/categories/${item?.id}/edit`)
             }
-          />
+          ></i>
           <i
-            className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300"
-            onClick={() => handleDelete(item.id)}
-          />
+            className="text-2xl bg-slate-100 rounded-md ki-outline ki-trash hover:text-slate-500 hover:scale-110 transition-all duration-300 ease-in-out"
+            onClick={() => handleDelete(item?.id)}
+          ></i>
         </div>
       ),
-      "Tanggal Kedatangan": item?.incomingDate || "-",
-      "Nomor Pengiriman": item?.deliveryNumber || "-",
-      "Nama Supplier": item?.supplierName || "-",
-      Pengirim: item?.submitter || "-",
-      Penerima: item?.receiver,
-      "Tanggal Ditambahkan": item?.createdAt,
-      "Tanggal Diubah": item?.updatedAt,
+      "Nama Kategori": item?.name || "N/A",
+      Deskripsi: item?.description || "N/A",
+      "Tanggal Ditambahkan": formatDate(item?.createdAt, "id-ID") || "N/A",
+      "Tanggal Terakhir Diubah": formatDate(item?.updatedAt, "id-ID") || "N/A",
     }));
-
     setList(mappedData);
   }, [items]);
 

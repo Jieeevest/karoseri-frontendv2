@@ -245,7 +245,7 @@ export default function AddInventory() {
     };
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.values(newErrors).every((error) => !error);
   };
 
   const handleSubmit = () => {
@@ -262,6 +262,9 @@ export default function AddInventory() {
         price: Number(payload.price),
         minimumStock: Number(payload.minimumStock),
         unit: payload.unit?.value,
+        typeId: payload.typeId?.value,
+        locationId: payload.locationId?.value,
+        supplierId: payload.supplierId?.value,
       };
       await createInventory(objectPayload).unwrap();
       setStatusMessage({
@@ -272,7 +275,7 @@ export default function AddInventory() {
       setOpenModal(false);
 
       setTimeout(() => {
-        router.push("/workspace/inventory");
+        router.push("/workspace/inventories");
       }, 1000);
     } catch (error) {
       setStatusMessage({
@@ -412,12 +415,10 @@ export default function AddInventory() {
               />
               <TextArea
                 label="Keterangan"
-                required={true}
                 placeholder="Tambahkan keterangan (opsional)"
                 className="w-full"
                 onChange={(e) => handleChange("description", e.target.value)}
                 value={payload.description}
-                error={errors.description}
               />
             </div>
           </Card>

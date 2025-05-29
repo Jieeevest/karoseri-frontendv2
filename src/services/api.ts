@@ -162,6 +162,8 @@ export interface VehicleData {
 
 export interface CategoryData {
   id: number;
+  name: string;
+  description: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -345,6 +347,8 @@ export interface ResponseVehicleData {
 export interface ResponseCategoryData {
   data: {
     id: number;
+    name: string;
+    description: string;
     createdAt: string;
     updatedAt: string;
   };
@@ -508,7 +512,7 @@ export const api = createApi({
         let queryString = "/inventory?";
 
         if (keyword) queryString += `keyword=${keyword}&`;
-        if (status) queryString += `category=${status}&`;
+        if (status) queryString += `status=${status}&`;
         if (pageSize) queryString += `limit=${pageSize}`;
         if (page) queryString += `&page=${page}`;
 

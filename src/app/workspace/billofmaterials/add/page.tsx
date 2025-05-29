@@ -4,20 +4,63 @@ import {
   InputText,
   SuccessModal,
   ConfirmationModal,
+  TextArea,
 } from "@/components/atoms";
 import DefaultButton from "@/components/atoms/Button";
 import { useRouter } from "next/navigation";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+import Loading from "@/components/molecules/Loading";
+import { Trash } from "lucide-react";
+import { useGetCategoriesQuery, useGetInventoryQuery } from "@/services/api";
+
+const CustomSelect = dynamic(() => import("@/components/atoms/Select"), {
+  ssr: false,
+  loading: () => <Loading />,
+});
+
+// Dummy data
+const dummyKaroseri = [
+  { label: "Karoseri A", value: "1" },
+  { label: "Karoseri B", value: "2" },
+];
+
+const dummyInventory = [
+  { label: "Kayu Jati", value: "1" },
+  { label: "Besi Hollow", value: "2" },
+];
+
+interface BOMItemType {
+  inventoryId?: {
+    label: string;
+    value: string;
+  } | null;
+  quantityPerUnit: string;
+}
 
 interface PayloadType {
-  bomCode?: string;
-  productName?: string;
-  productType?: string;
-  unit?: string;
-  component?: string;
-  componentQty?: string;
+  name?: string;
+  karoseriCategoryId?: {
+    label: string;
+    value: string;
+  } | null;
   description?: string;
+  items: BOMItemType[];
 }
+
+const filter = {
+  keyword: "",
+  status: "active",
+  pageSize: 5,
+  page: 1,
+  totalData: 0,
+} as {
+  keyword: string;
+  status: string;
+  pageSize: number;
+  page: number;
+  totalData: number;
+};
 
 export default function AddNewBillOfMaterials() {
   const router = useRouter();
@@ -27,45 +70,70 @@ export default function AddNewBillOfMaterials() {
     message: "",
     type: "",
   });
+
   const [payload, setPayload] = useState<PayloadType>({
-    bomCode: "",
-    productName: "",
-    productType: "",
-    unit: "",
-    component: "",
-    componentQty: "",
+    name: "",
+    karoseriCategoryId: null,
     description: "",
+    items: [{ inventoryId: null, quantityPerUnit: "" }],
   });
 
   const [errors, setErrors] = useState({
-    bomCode: "",
-    productName: "",
-    productType: "",
-    unit: "",
-    component: "",
-    componentQty: "",
+    name: "",
+    karoseriCategoryId: "",
   });
 
-  const handleChange = (key: string, value: string) => {
+  const { data: categoryData } = useGetCategoriesQuery(filter);
+  const { data: inventoryData } = useGetInventoryQuery(filter);
+
+  const categories = useMemo(
+    () => categoryData?.data?.categories || [],
+    [categoryData?.data?.categories]
+  );
+
+  const inventories = useMemo(
+    () => inventoryData?.data?.inventory || [],
+    [inventoryData?.data?.inventory]
+  );
+
+  const handleChange = (key: keyof PayloadType, value: any) => {
     if (value) setErrors((prev) => ({ ...prev, [key]: "" }));
-    setPayload({
-      ...payload,
-      [key]: value,
-    });
+    setPayload((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleItemChange = (
+    index: number,
+    key: keyof BOMItemType,
+    value: any
+  ) => {
+    const updatedItems = [...payload.items];
+    updatedItems[index][key] = value;
+    setPayload((prev) => ({ ...prev, items: updatedItems }));
+  };
+
+  const addItemRow = () => {
+    setPayload((prev) => ({
+      ...prev,
+      items: [...prev.items, { inventoryId: null, quantityPerUnit: "" }],
+    }));
+  };
+
+  const removeItemRow = (index: number) => {
+    setPayload((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index),
+    }));
   };
 
   const validateForm = () => {
     const newErrors = {
-      bomCode: payload.bomCode ? "" : "Kode BoM wajib diisi.",
-      productName: payload.productName ? "" : "Nama Produk wajib diisi.",
-      productType: payload.productType ? "" : "Tipe Produk wajib diisi.",
-      unit: payload.unit ? "" : "Satuan wajib diisi.",
-      component: payload.component ? "" : "Komponen wajib diisi.",
-      componentQty: payload.componentQty ? "" : "Jumlah Komponen wajib diisi.",
+      name: payload.name ? "" : "Nama Material wajib diisi.",
+      karoseriCategoryId: payload.karoseriCategoryId
+        ? ""
+        : "Kategori Karoseri wajib dipilih.",
     };
-
     setErrors(newErrors);
-    return Object.values(newErrors).every((error) => !error);
+    return Object.values(newErrors).every((e) => !e);
   };
 
   const handleSubmit = () => {
@@ -78,14 +146,14 @@ export default function AddNewBillOfMaterials() {
     try {
       // TODO: replace with mutation
       setStatusMessage({
-        message: "Penambahan BoM berhasil!",
+        message: "Penambahan Material berhasil!",
         type: "Success",
       });
       setSuccessModal(true);
-      router.push("/bill-of-materials");
+      router.push("/billofmaterials");
     } catch (error) {
       setStatusMessage({
-        message: "Gagal menambahkan BoM.",
+        message: "Gagal menambahkan material.",
         type: "Error",
       });
       setSuccessModal(true);
@@ -95,26 +163,25 @@ export default function AddNewBillOfMaterials() {
   return (
     <Fragment>
       <div className="pb-10 -mt-5 overflow-auto">
-        <div className="px-10 bg-transparent pt-4 sm:px-6 lg:px-8">
+        <div className="px-10 pt-4 sm:px-6 lg:px-8 space-y-6">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">
                 Tambah Bill of Materials
               </h1>
               <p className="text-base text-gray-600 px-0.5 pb-3">
-                Formulir penambahan data BoM.
+                Formulir penambahan data Material.
               </p>
             </div>
           </div>
-        </div>
-        <div className="px-10 bg-transparent pt-4 sm:px-6 lg:px-8">
-          <div className="flex max-w-full min-w-fit">
-            <Card
-              styleHeader="justify-start"
-              contentHeader={<p className="font-semibold">Informasi BoM</p>}
-              styleFooter="justify-end"
-              contentFooter={
-                <div className="flex justify-end gap-2">
+
+          {/* Metadata BoM */}
+          <Card
+            styleHeader="justify-start"
+            contentHeader={
+              <div className="flex justify-between w-full items-center">
+                <p className="font-semibold">Informasi Umum Material</p>
+                <div className="flex gap-2">
                   <DefaultButton
                     type="pill"
                     appearance="light"
@@ -128,82 +195,106 @@ export default function AddNewBillOfMaterials() {
                     onClick={handleSubmit}
                   />
                 </div>
-              }
-            >
-              <div className="w-[1300px] grid grid-cols-2 gap-x-6 gap-y-4 my-4">
-                <InputText
-                  type="text"
-                  label="Kode BoM"
-                  required
-                  placeholder="Contoh: BOM-001"
-                  className="w-full"
-                  value={payload.bomCode || ""}
-                  onChange={(e) => handleChange("bomCode", e.target.value)}
-                  error={errors.bomCode}
-                />
-                <InputText
-                  type="text"
-                  label="Nama Produk"
-                  required
-                  placeholder="Contoh: Kursi Kayu"
-                  className="w-full"
-                  value={payload.productName || ""}
-                  onChange={(e) => handleChange("productName", e.target.value)}
-                  error={errors.productName}
-                />
-                <InputText
-                  type="text"
-                  label="Tipe Produk"
-                  required
-                  placeholder="Contoh: Finished Good"
-                  className="w-full"
-                  value={payload.productType || ""}
-                  onChange={(e) => handleChange("productType", e.target.value)}
-                  error={errors.productType}
-                />
-                <InputText
-                  type="text"
-                  label="Satuan"
-                  required
-                  placeholder="Contoh: pcs"
-                  className="w-full"
-                  value={payload.unit || ""}
-                  onChange={(e) => handleChange("unit", e.target.value)}
-                  error={errors.unit}
-                />
-                <InputText
-                  type="text"
-                  label="Komponen"
-                  required
-                  placeholder="Contoh: Kayu Jati"
-                  className="w-full"
-                  value={payload.component || ""}
-                  onChange={(e) => handleChange("component", e.target.value)}
-                  error={errors.component}
-                />
-                <InputText
-                  type="text"
-                  label="Jumlah Komponen"
-                  required
-                  placeholder="Contoh: 5"
-                  className="w-full"
-                  value={payload.componentQty || ""}
-                  onChange={(e) => handleChange("componentQty", e.target.value)}
-                  error={errors.componentQty}
-                />
-                <InputText
-                  type="text"
-                  label="Keterangan"
-                  placeholder="Tambahkan keterangan (opsional)"
-                  className="w-full"
-                  value={payload.description || ""}
-                  onChange={(e) => handleChange("description", e.target.value)}
-                />
               </div>
-            </Card>
-          </div>
+            }
+            styleFooter="justify-end"
+          >
+            <div className="flex flex-col gap-4 my-4">
+              <InputText
+                label="Nama Material"
+                placeholder="Contoh: Rangka Bus A"
+                required
+                className="w-full"
+                value={payload.name || ""}
+                onChange={(e) => handleChange("name", e.target.value)}
+                error={errors.name}
+              />
+              <CustomSelect
+                label="Kategori Karoseri"
+                required={true}
+                optionValue={categories?.map((item: any) => ({
+                  label: item.name,
+                  value: item.id,
+                }))}
+                size="sm"
+                value={payload.karoseriCategoryId}
+                onChange={(e) => handleChange("karoseriCategoryId", e)}
+                error={errors.karoseriCategoryId}
+              />
+              <TextArea
+                label="Keterangan"
+                placeholder="Tambahkan deskripsi (opsional)"
+                className="w-full"
+                onChange={(e) => handleChange("description", e.target.value)}
+                value={payload.description}
+              />
+            </div>
+          </Card>
+
+          {/* Tabel Item BoM */}
+          <Card
+            styleHeader="justify-start"
+            contentHeader={<p className="font-semibold">Item Material</p>}
+            styleFooter="justify-end"
+            contentFooter={
+              <DefaultButton
+                text="Tambah Item"
+                appearance="primary"
+                onClick={addItemRow}
+              />
+            }
+          >
+            <div className="space-y-4 my-4">
+              {payload.items.map((item, index) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-12 items-center gap-4"
+                >
+                  <div className="col-span-6">
+                    <CustomSelect
+                      label={`Item ${index + 1}`}
+                      required={true}
+                      optionValue={inventories?.map((item: any) => ({
+                        label: item.name,
+                        value: item.id,
+                      }))}
+                      value={item.inventoryId}
+                      size="sm"
+                      onChange={(e) =>
+                        handleItemChange(index, "inventoryId", e)
+                      }
+                    />
+                  </div>
+                  <div className="col-span-4">
+                    <InputText
+                      label="Jumlah per Unit"
+                      required
+                      type="number"
+                      value={item.quantityPerUnit}
+                      onChange={(e) =>
+                        handleItemChange(
+                          index,
+                          "quantityPerUnit",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <DefaultButton
+                      text={<Trash className="w-5 h-5" />}
+                      appearance="danger"
+                      onClick={() => removeItemRow(index)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
         </div>
       </div>
+
+      {/* Modal */}
       {openModal && (
         <ConfirmationModal
           showModal={openModal}

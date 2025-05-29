@@ -135,12 +135,6 @@ export default function GroupOverview() {
             </p>
           </div>
           <div className="space-x-2">
-            {/* <DefaultButton
-              type="pill"
-              appearance="dark"
-              text="Riwayat Perubahan"
-              icon="ki-archive-tick"
-            /> */}
             <DefaultButton
               type="pill"
               appearance="primary"

@@ -19,14 +19,12 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 const columns = [
   { label: "", tooltip: "", icon: "" },
   { label: "Nama Barang", tooltip: "", icon: "" },
-  { label: "Jumlah", tooltip: "", icon: "" },
-  { label: "Tipe", tooltip: "", icon: "" },
-  { label: "Kategori", tooltip: "", icon: "" },
+  { label: "Suplier", tooltip: "", icon: "" },
   { label: "Lokasi", tooltip: "", icon: "" },
+  { label: "Jumlah Stok", tooltip: "", icon: "" },
   { label: "Stok Minimum", tooltip: "", icon: "" },
-  { label: "Deskripsi", tooltip: "", icon: "" },
   { label: "Tanggal Ditambahkan", tooltip: "", icon: "" },
-  { label: "Tanggal Terakhir Diubah", tooltip: "", icon: "" },
+  { label: "Tanggal Diubah", tooltip: "", icon: "" },
 ];
 
 export default function InventoryOverview() {
@@ -90,14 +88,12 @@ export default function InventoryOverview() {
         </div>
       ),
       "Nama Barang": item?.name || "N/A",
-      Jumlah: item?.amount || "N/A",
-      Tipe: item?.type?.name || "N/A",
-      Kategori: item?.category?.name || "N/A",
+      Suplier: item?.supplier?.name || "N/A",
       Lokasi: item?.location?.name || "N/A",
+      "Jumlah Stok": item?.amount || "N/A",
       "Stok Minimum": item?.minimumStock || "N/A",
-      Deskripsi: item?.description || "N/A",
-      "Tanggal Ditambahkan": formatDate(item?.createdAt) || "N/A",
-      "Tanggal Terakhir Diubah": formatDate(item?.updatedAt) || "N/A",
+      "Tanggal Ditambahkan": formatDate(item?.createdAt, "id-ID") || "N/A",
+      "Tanggal Diubah": formatDate(item?.updatedAt, "id-ID") || "N/A",
     }));
     setInventoryList(mappedData);
   }, [inventory]);

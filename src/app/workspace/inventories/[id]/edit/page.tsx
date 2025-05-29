@@ -221,6 +221,14 @@ export default function EditInventory() {
         price: currentData?.price?.toString() ?? "0",
         minimumStock: currentData?.minimumStock?.toString() ?? "0",
         description: currentData?.description ?? "",
+        locationId: {
+          label: currentData?.location?.name,
+          value: currentData?.location?.id,
+        },
+        supplierId: {
+          label: currentData?.supplier?.name,
+          value: currentData?.supplier?.id,
+        },
       });
     }
   }, [inventoryData]);
@@ -263,7 +271,7 @@ export default function EditInventory() {
     };
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.values(newErrors).every((error) => !error);
   };
 
   const handleSubmit = () => {
@@ -280,24 +288,27 @@ export default function EditInventory() {
         price: Number(payload.price),
         minimumStock: Number(payload.minimumStock),
         unit: payload.unit?.value,
+        typeId: payload.typeId?.value,
+        locationId: payload.locationId?.value,
+        supplierId: payload.supplierId?.value,
       };
       await updateInventory({
         id: Number(id),
         updates: objectPayload,
       }).unwrap();
       setStatusMessage({
-        message: "Inventaris berhasil ditambahkan!",
+        message: "Inventaris berhasil dirubah!",
         type: "Success",
       });
       setSuccessModal(true);
       setOpenModal(false);
 
       setTimeout(() => {
-        router.push("/workspace/inventory");
+        router.push("/workspace/inventories");
       }, 1000);
     } catch (error) {
       setStatusMessage({
-        message: "Gagal menambahkan inventaris.",
+        message: "Gagal merubah inventaris.",
         type: "Error",
       });
       setSuccessModal(true);
@@ -310,10 +321,10 @@ export default function EditInventory() {
       <div className="pb-10 -mt-5">
         <div className="px-10 pt-4 sm:px-6 lg:px-8">
           <h1 className="text-2xl font-bold text-gray-800">
-            Tambah Inventaris
+            Ubah Informasi Inventaris
           </h1>
           <p className="text-base text-gray-600 px-0.5 pb-3">
-            Formulir penambahan data inventaris.
+            Formulir perubahan data inventaris.
           </p>
         </div>
         <div className="px-10 pt-4 sm:px-6 lg:px-8">

@@ -12,13 +12,23 @@ import { useRouter } from "next/navigation";
 
 const columns = [
   { label: "", tooltip: "", icon: "" },
-  { label: "Tanggal Kedatangan", tooltip: "", icon: "" },
-  { label: "Nomor Pengiriman", tooltip: "", icon: "" },
-  { label: "Nama Supplier", tooltip: "", icon: "" },
-  { label: "Pengirim", tooltip: "", icon: "" },
-  { label: "Penerima", tooltip: "", icon: "" },
-  { label: "Tanggal Ditambahkan", tooltip: "", icon: "" },
-  { label: "Tanggal Diubah", tooltip: "", icon: "" },
+  { label: "Nama BOM", tooltip: "", icon: "" },
+  {
+    label: "Kategori Karoseri",
+    tooltip: "",
+    icon: "",
+  },
+  { label: "Deskripsi", tooltip: "", icon: "" },
+  {
+    label: "Tanggal Ditambahkan",
+    tooltip: "",
+    icon: "",
+  },
+  {
+    label: "Tanggal Terakhir Diubah",
+    tooltip: "",
+    icon: "",
+  },
 ];
 
 export default function BillOfMaterialsView() {
@@ -78,13 +88,15 @@ export default function BillOfMaterialsView() {
           />
         </div>
       ),
-      "Tanggal Kedatangan": item?.incomingDate || "-",
-      "Nomor Pengiriman": item?.deliveryNumber || "-",
-      "Nama Supplier": item?.supplierName || "-",
-      Pengirim: item?.submitter || "-",
-      Penerima: item?.receiver,
-      "Tanggal Ditambahkan": item?.createdAt,
-      "Tanggal Diubah": item?.updatedAt,
+      "Nama BOM": item?.name || "-",
+      "Kategori Karoseri": item?.karoseriCategory?.name || "-",
+      Deskripsi: item?.description || "-",
+      "Tanggal Ditambahkan": item?.createdAt
+        ? new Date(item.createdAt).toLocaleDateString("id-ID")
+        : "-",
+      "Tanggal Terakhir Diubah": item?.updatedAt
+        ? new Date(item.updatedAt).toLocaleDateString("id-ID")
+        : "-",
     }));
 
     setList(mappedData);
@@ -123,10 +135,10 @@ export default function BillOfMaterialsView() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Master Data Bill of Materials
+              Bill of Materials
             </h1>
             <p className="text-base text-gray-600 pb-3">
-              Mengelola daftar bill of materials.
+              Mengelola data bill of materials.
             </p>
           </div>
           <DefaultButton
