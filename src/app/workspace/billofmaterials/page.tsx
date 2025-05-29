@@ -123,7 +123,7 @@ export default function BillOfMaterialsView() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Manajemen Bill of Materials
+              Master Data Bill of Materials
             </h1>
             <p className="text-base text-gray-600 pb-3">
               Mengelola daftar bill of materials.

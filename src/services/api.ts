@@ -67,8 +67,10 @@ export interface InventoryData {
   name: string | null;
   amount: number;
   type: string | null;
-  category: string | null;
   location: string | null;
+  supplier: string | null;
+  unit: string | null;
+  price: number | null;
   status: string | null;
   createdAt: string;
   updatedAt: string;
@@ -223,6 +225,11 @@ export interface ResponseInventoryData {
     location: string | null;
     status: string | null;
     minimumStock: number | null;
+    price: number | null;
+    supplierId: number;
+    supplier: string | null;
+    unitId: number;
+    unit: string | null;
     description: string | null;
     createdAt: string;
     updatedAt: string;

@@ -28,6 +28,24 @@ const navItems: NavItem[] = [
     separator: "",
   },
   {
+    href: "/workspace/categories",
+    label: "Kategori Karoseri",
+    icon: "ki-office-bag",
+    separator: "core",
+  },
+  {
+    href: "/workspace/billofmaterials",
+    label: "Kebutuhan Bahan Baku",
+    icon: "ki-office-bag",
+    separator: "core",
+  },
+  {
+    href: "/workspace/projects",
+    label: "Project",
+    icon: "ki-office-bag",
+    separator: "core",
+  },
+  {
     href: "/workspace/requests",
     label: "Permintaan",
     icon: "ki-package",
@@ -121,9 +139,9 @@ export default function Sidebar() {
   return (
     <div className="absolute">
       <div
-        className={`lg:w-64 w-full h-screen bg-white text-black fixed top-0 left-0 z-40 shadow-sm border-r-[1px] border-gray-300 transform -translate-x-full lg:translate-x-0`}
+        className={`lg:w-64 w-full h-screen overflow-y-auto bg-white text-black fixed top-0 left-0 z-40 shadow-sm border-r-[1px] border-gray-300 transform -translate-x-full lg:translate-x-0`}
       >
-        <div className="p-6 px-2">
+        <div className="p-6 px-2 ">
           <div className={`flex items-center justify-start mb-10  pb-4`}>
             <div className="me-2 flex h-[40px] w-[40px] items-center justify-center rounded-md bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
               <Grid className="h-5 w-5" />
